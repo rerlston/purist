@@ -1,0 +1,6 @@
+from Builtin require [ABC]
+from Builtin require [Abc]
+from a require [A]
+from a.b require [B]
+from a123 require [B345]
+

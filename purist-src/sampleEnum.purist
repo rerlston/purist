@@ -1,0 +1,6 @@
+enumeration MyCustomEnum {
+    "APPLE",
+    "BANANA",
+    "RED",
+    "BLUE"
+}

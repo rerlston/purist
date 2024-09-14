@@ -1,0 +1,47 @@
+# A Binary Tree node
+type TreeNode<T> {
+	data?: T
+	left?: TreeNode
+    right?: TreeNode
+}
+
+class BinarySearchTree<T> {
+    head: TreeNode<T>
+
+    private process(items: List<T>): TreeNode<T> {
+        count: Integer = len(items)
+        if count <= 0 {
+            return null
+        }
+        leftItems = items[:count // 2]
+        left = process(leftItems)
+        parent: TreeNode<T> = new TreeNode<T>(left=left, data='')
+
+		rightItems = items[count // 2:]
+		right = process(rightItems)
+
+		return parent
+    }
+
+	private search(currentNode: TreeNode<T>, searchValue: T): TreeNode<T> {
+		if currentNode == null {
+			return null
+		}
+		if currentNode.data == searchValue {
+			return currentNode
+		}
+		if searchValue < currentNode.data {
+			return search(currentNode.left, searchValue)
+		} else {
+			return search(currentNode.right, searchValue)
+		}
+	}
+
+	find(item: String): TreeNode<T> {
+		return search(head, item)
+	}
+
+	sortedListToBST(items: List<T>): void {
+        head = process(items)
+    }
+}

@@ -1,0 +1,19 @@
+from Builtin require [Strategy, Stateless, Logger]
+
+from sampleStrategy importrequire [SampleStrategy]
+from sampleBusiness require [SampleBusiness]
+from sampleType require [MyCustomType]
+
+// there is no stateful attribute so the Stateless implementation is already implied
+public class SampleInstanceStrategy extends Strategy implements SampleStrategy, Stateless {
+    logging: Logger
+
+    constructor() {
+        super("a123")
+    }
+
+    // method from SampleStrategy
+    public process(value: MyCustomType): void {
+        logging.info("you have reached the process method of the ${class.name}: person name: ${value.name}")
+    }
+}

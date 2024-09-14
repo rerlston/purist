@@ -1,0 +1,5 @@
+from sampleType require [MyCustomType]
+
+public interface SampleStrategy {
+    public process(value: MyCustomType): void
+}

@@ -1,0 +1,6 @@
+type MyCustomType {
+    name: String("", "[A-Z][a-z\- ]{0:64}")
+    middleName: String | null = null
+    surname: String(null, "[A-Z][a-z\-]{0:64}") | null
+    dateOfBirth: Date("", "YYYY/MM/DD")
+}
