@@ -11,7 +11,7 @@ class MyEntryPoint implements EntryPoint {
         this.service.process("a123")
         myInteger: integer = 1
         myDecimal: number = 1.3
-        myString: string = "my sting is not empty"
+        myString: string = "my string is not empty"
         myNull: string|null = null
 
         logging.info("you have reached the end of the entry point")
