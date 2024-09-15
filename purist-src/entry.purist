@@ -1,6 +1,6 @@
 from Builtin require [EntryPoint, Logger]
 
-from sampleBusiness require [SampleBusiness]
+from business.sampleBusiness require [SampleBusiness]
 
 class MyEntryPoint implements EntryPoint {
     service: SampleBusiness

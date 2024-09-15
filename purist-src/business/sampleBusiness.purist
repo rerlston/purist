@@ -1,15 +1,15 @@
 from Builtin require [Strategy, Logger]
 
-from sampleInstanceStrategy require [SampleInstanceStrategy]
+from strategies.sampleInstanceStrategy require [SampleInstanceStrategy]
 from sampleType require [MyCustomType]
 from sampleEnum require [MyCustomEnum]
 
 // despite having a stateful attribute the class implements the Stateless interface
 // which means a single instance exists but with a shared state
 // changing the state's values will affect the other classes with the same dependency
-public class SampleBusiness implements Stateless {
-    private logging: Logger      // auto injected
-    private myType: MyCustomType // not auto injected
+class SampleBusiness implements Stateless {
+    logging: Logger      // auto injected
+    myType: MyCustomType // not auto injected
 
     public process(variable: String): int {
         logging.info("SampleBusiness.process called")

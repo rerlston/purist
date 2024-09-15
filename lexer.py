@@ -1,170 +1,116 @@
 """
-Purist Lexer, converts discovered source code values into tokens
+Purist source code lexer, reads source code and discovers words, numbers, operators, etc
 """
 
-from enum import Enum
-from typing import List
+from typing import Tuple
 
-from decoder import Decoder
+from errors import DecodeError, Error, InvalidComment
 
-class TokenType(Enum):
+VALID_CHARACTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_1234567890'
+
+class Lexer():
     """
-    Purist Token Types
+    Purist Lexer, reads source code and discovers words, numbers, operators, etc
     """
+    def __init__(self, filepath: str, text: str) -> None:
+        self._filepath = filepath
+        self._text = text
+        self._line = 0
+        self._column = 0
+        self._lines = text.splitlines()
 
-    CLASS = 'CLASS'
-    INTERFACE = 'INTERFACE'
-    TYPE = 'TYPE'
-    ENUMERATION = 'ENUMERATION'
-    EXTENDS = 'EXTENDS'
-    IMPLEMENTS = 'IMPLEMENTS'
-    FROM = 'FROM'
-    BUILTIN = 'BUILTIN'
-    REQUIRE = 'REQUIRE'
-    IDENTIFIER = 'IDENTIFIER'
-    INTEGER_TYPE = 'INTEGER_TYPE'
-    INTEGER_VALUE = 'INTEGER_VALUE'
-    NUMBER_TYPE = 'NUMBER_TYPE'
-    NUMBER_VALUE = 'NUMBER_VALUE'
-    STRING_TYPE = 'STRING_TYPE'
-    STRING_VALUE = 'STRING_VALUE'
-    BOOLEAN_TYPE = 'BOOLEAN_TYPE'
-    BOOLEAN_VALUE = 'BOOLEAN_VALUE'
-    LEFT_SQUARE_BRACKET = 'LEFT_SQUARE_BRACKET'
-    RIGHT_SQUARE_BRACKET = 'RIGHT_SQUARE_BRACKET'
-    LEFT_BRACKET = 'LEFT_BRACKET'
-    RIGHT_BRACKET = 'RIGHT_BRACKET'
-    LEFT_CURLY_BRACKET = 'LEFT_CURLY_BRACKET'
-    RIGHT_CURLY_BRACKET = 'RIGHT_CURLY_BRACKET'
-    LEFT_ANGLE_BRACKET = 'LEFT_ANGLE_BRACKET'
-    RIGHT_ANGLE_BRACKET = 'RIGHT_ANGLE_BRACKET'
-    COMMA = 'COMMA'
-    PRIVATE = 'PRIVATE'
-    PUBLIC = 'PUBLIC'
-    CLASS_BODY = 'CLASS_BODY'
-    INTERFACE_BODY = 'INTERFACE_BODY'
-    TYPE_BODY = 'TYPE_BODY'
-    ENUMERATION_BODY = 'ENUMERATION_BODY'
-    GENERIC_TYPE = 'GENERIC_TYPE'
-    CLASS_IDENTIFIER = 'CLASS_IDENTIFIER'
-    INTERFACE_IDENTIFIER = 'INTERFACE_IDENTIFIER'
-    TYPE_IDENTIFIER = 'TYPE_IDENTIFIER'
-    ENUMERATION_IDENTIFIER = 'ENUMERATION_IDENTIFIER'
-    VARIABLE = 'VARIABLE'
-    CONSTANT = 'CONSTANT'
-    NEW = 'NEW'
-    WHILE = 'WHILE'
-    IF = 'IF'
-    ELSE = 'ELSE'
-    RETURN = 'RETURN'
-    FOR = 'FOR'
-    IN = 'IN'
-    COLON = 'COLON'
-    EQUALS = 'EQUALS'
-    FULL_STOP = 'FULL_STOP'
-    NOT = 'NOT'
-    TRUE = 'TRUE'
-    FALSE = 'FALSE'
-    NULL = 'NULL'
-    LOGICAL_OR = 'LOGICAL_OR'
-    EOF = "EOF"
+    def next(self) -> Tuple[str|None, Error|None, int, int]:
+        """
+        Reads the next source code value from the file
+        Returns a tuple of a discovered value and a specific error if encountered
 
-class Token():
-    """
-    Purist Token, simple model class representing the parsers tokens
-    """
-    def __init__(self, type: TokenType, value: str|int|float|None = None) -> None:
-        self._type = type
-        self._value = value
+        Returns:
+            Tuple[str|None, Error|None]: (discovered value, error)
+        """
+        response: str|None = None
+        error: Error|None = None
+        start_column: int = self._column
+        while response is None and error is None and self._line < len(self._lines):
+            while response is None and error is None and self._column < len(self._lines[self._line]):
+                start_column = self._column
+                character: str = self._lines[self._line][self._column]
+                while character == ' ' or character == '\t':
+                    self._column += 1
+                    character = self._lines[self._line][self._column]
+                if character.isalpha():
+                    response, error = self._fetch_word()
+                elif character.isnumeric():
+                    response, error = self._fetch_number()
+                elif character == '"':
+                    response, error = self._fetch_string()
+                elif character == '/':
+                    response, error = self._fetch_comment()
+                elif character in [
+                        '[', ']', '{', '}', '(', ')', ',',
+                        ':', '=', '<', '>', '.', '!', '|'
+                    ]:
+                    self._column += 1
+                    response = character
+                else:
+                    error = DecodeError(
+                        character,
+                        self._filepath,
+                        self._line,
+                        self._column
+                    )
+            if self._column >= len(self._lines[self._line]):
+                self._line += 1
+                self._column = 0
+        return response, error, self._line, start_column
 
-    def __repr__(self) -> str:
-        if self._value is not None:
-            return f'({self._type.value} = {self._value})'
-        else:
-            return f'({self._type.value})'
+    def _fetch_word(self) -> Tuple[str|None, Error|None]:
+        word = ''
+        character = self._lines[self._line][self._column]
+        while character in VALID_CHARACTERS and self._column < len(self._lines[self._line]):
+            word += character
+            self._column += 1
+            if self._column < len(self._lines[self._line]):
+                character = self._lines[self._line][self._column]
+        return word, None
 
-class Tokenizer():
-    """
-    Purist Tokenizer, converts discovered source code values into tokens
-    """
-    def __init__(self) -> None:
-        pass
+    def _fetch_number(self) -> Tuple[str|None, Error|None]:
+        number = ''
+        character = self._lines[self._line][self._column]
+        while character in '1234567890.' and self._column < len(self._lines[self._line]):
+            if character == '.':
+                if '.' in number:
+                    return None, DecodeError(
+                        'too many decimal points',
+                        self._filepath,
+                        self._line,
+                        self._column
+                    )
+            number += character
+            self._column += 1
+            if self._column < len(self._lines[self._line]):
+                character = self._lines[self._line][self._column]
+        return number, None
 
-    def tokenize(self, filepath: str, text: str) -> List[Token]:
-        response: List[Token] = []
-        decoder: Decoder = Decoder(filepath, text)
-        next_value, error = decoder.next()
-        while next_value is not None and error is None:
-            if next_value == 'from':
-                response.append(Token(TokenType.FROM))
-            elif next_value == 'Builtin':
-                response.append(Token(TokenType.BUILTIN))
-            elif next_value == 'require':
-                response.append(Token(TokenType.REQUIRE))
-            elif next_value == 'class':
-                response.append(Token(TokenType.CLASS))
-            elif next_value == 'interface':
-                response.append(Token(TokenType.INTERFACE))
-            elif next_value == 'type':
-                response.append(Token(TokenType.TYPE))
-            elif next_value == 'enumeration':
-                response.append(Token(TokenType.ENUMERATION))
-            elif next_value == 'extends':
-                response.append(Token(TokenType.EXTENDS))
-            elif next_value == 'implements':
-                response.append(Token(TokenType.IMPLEMENTS))
-            elif next_value == 'string':
-                response.append(Token(TokenType.STRING_TYPE))
-            elif next_value == 'boolean':
-                response.append(Token(TokenType.BOOLEAN_TYPE))
-            elif next_value == 'integer':
-                response.append(Token(TokenType.INTEGER_TYPE))
-            elif next_value == 'number':
-                response.append(Token(TokenType.NUMBER_TYPE))
-            elif next_value == 'false' or next_value == 'true':
-                response.append(Token(TokenType.BOOLEAN_VALUE, next_value))
-            elif next_value == 'null':
-                response.append(Token(TokenType.NULL))
-            elif next_value.isnumeric() and '.' not in next_value:
-                response.append(Token(TokenType.INTEGER_VALUE, next_value))
-            elif next_value.isnumeric():
-                response.append(Token(TokenType.NUMBER_VALUE, next_value))
-            elif next_value.startswith('"'):
-                response.append(Token(TokenType.STRING_VALUE, next_value))
-            elif next_value == ',':
-                response.append(Token(TokenType.COMMA))
-            elif next_value == '[':
-                response.append(Token(TokenType.LEFT_SQUARE_BRACKET))
-            elif next_value == ']':
-                response.append(Token(TokenType.RIGHT_SQUARE_BRACKET))
-            elif next_value == '(':
-                response.append(Token(TokenType.LEFT_BRACKET))
-            elif next_value == ')':
-                response.append(Token(TokenType.RIGHT_BRACKET))
-            elif next_value == '{':
-                response.append(Token(TokenType.LEFT_CURLY_BRACKET))
-            elif next_value == '}':
-                response.append(Token(TokenType.RIGHT_CURLY_BRACKET))
-            elif next_value == ':':
-                response.append(Token(TokenType.COLON))
-            elif next_value == '=':
-                response.append(Token(TokenType.EQUALS))
-            elif next_value == '<':
-                response.append(Token(TokenType.LEFT_ANGLE_BRACKET))
-            elif next_value == '>':
-                response.append(Token(TokenType.RIGHT_ANGLE_BRACKET))
-            elif next_value == '.':
-                response.append(Token(TokenType.FULL_STOP))
-            elif next_value == '!':
-                response.append(Token(TokenType.NOT))
-            elif next_value == '|':
-                response.append(Token(TokenType.LOGICAL_OR))
-            else:
-                response.append(Token(TokenType.IDENTIFIER, next_value))
-            next_value, error = decoder.next()
-        if error is not None:
-            print(error.get_error())
-            return []
+    def _fetch_string(self) -> Tuple[str|None, Error|None]:
+        string = ''
+        self._column += 1
+        character = self._lines[self._line][self._column]
+        while character != '"' and self._line < len(self._lines):
+            string += character
+            self._column += 1
+            if self._column >= len(self._lines[self._line]):
+                self._line += 1
+                self._column = 0
+            character = self._lines[self._line][self._column]
+        self._column += 1
+        return f'"{string}"', None
 
-        response.append(Token(TokenType.EOF))
-        return response
+    def _fetch_comment(self) -> Tuple[str|None, Error|None]:
+        first_character = self._lines[self._line][self._column]
+        if self._column + 1 < len(self._lines[self._line]):
+            if first_character == '/' and self._lines[self._line][self._column + 1] == '/':
+                comment = self._lines[self._line][self._column:]
+                self._line += 1
+                self._column = 0
+                return comment, None
+        return None, InvalidComment(self._filepath, self._line, self._column)

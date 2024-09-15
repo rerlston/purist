@@ -37,3 +37,11 @@ class DecodeError(Error):
     """
     def __init__(self, character: str, filename: str, line: int, column: int) -> None:
         super().__init__(f'Unexpected character: "{character}"', filename, line, column)
+
+class UnexpectedKeyword(Error):
+    """
+    Error for unexpected keywords
+    """
+    def __init__(self, expected: str, found: str, filename: str, line: int, column: int) -> None:
+        message = f'Unexpected keyword: "{found}" expected "{expected}"'
+        super().__init__(message, filename, line, column)
