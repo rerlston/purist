@@ -6,6 +6,7 @@ import sys
 
 from os.path import join as path
 
+import time
 from typing import Any, Dict, List, Tuple
 from errors import UnexpectedKeyword
 from tokenizer import Token, TokenType, Tokenizer
@@ -57,6 +58,7 @@ class Parser():
         self._tokenizer = Tokenizer()
         self._src_folder = src_folder
         self._parsed_files: List[str] = []
+        self._parsed_file_nodes: Dict[str, Node] = {}
 
     def parse(self, file_path: str) -> Node|None:
         """
@@ -68,6 +70,10 @@ class Parser():
             Node: an abstract syntax tree root node
         """
         if file_path in self._parsed_files:
+            if file_path in self._parsed_file_nodes:
+                print(f'parsing {file_path} from cache')
+                return self._parsed_file_nodes[file_path]
+            print("cyclic dependency detected")
             return None
         full_path = path(self._src_folder, file_path)
         print(f'parsing {full_path}')
@@ -78,6 +84,7 @@ class Parser():
                 tokens = self._tokenizer.tokenize(file_path, text)
                 try:
                     ast = self._parse_tokens(tokens, file_path)
+                    self._parsed_file_nodes[file_path] = ast
                     return ast
                 except ValueError as e:
                     print(f'Compile errors: {e}')
@@ -270,8 +277,11 @@ def main(filename: str) -> None:
     Entry point to the parser
     """
     parser = Parser('purist-src')
+    start = time.time()
     ast = parser.parse(filename)
+    end = time.time()
     print(ast)
+    print(f'Parsed in {end - start} seconds')
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:

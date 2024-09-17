@@ -39,12 +39,12 @@ class Lexer():
                     character = self._lines[self._line][self._column]
                 if character.isalpha():
                     response, error = self._fetch_word()
-                elif character.isnumeric():
+                elif character.isnumeric() or character == '-':
                     response, error = self._fetch_number()
                 elif character == '"':
                     response, error = self._fetch_string()
                 elif character == '/':
-                    response, error = self._fetch_comment()
+                    response, error = self._fetch_comment_or_divide()
                 elif character in [
                         '[', ']', '{', '}', '(', ')', ',',
                         ':', '=', '<', '>', '.', '!', '|'
@@ -61,7 +61,7 @@ class Lexer():
             if self._column >= len(self._lines[self._line]):
                 self._line += 1
                 self._column = 0
-        return response, error, self._line, start_column
+        return response, error, self._line + 1, start_column + 1
 
     def _fetch_word(self) -> Tuple[str|None, Error|None]:
         word = ''
@@ -76,7 +76,7 @@ class Lexer():
     def _fetch_number(self) -> Tuple[str|None, Error|None]:
         number = ''
         character = self._lines[self._line][self._column]
-        while character in '1234567890.' and self._column < len(self._lines[self._line]):
+        while character in '-1234567890.' and self._column < len(self._lines[self._line]):
             if character == '.':
                 if '.' in number:
                     return None, DecodeError(
@@ -101,16 +101,22 @@ class Lexer():
             if self._column >= len(self._lines[self._line]):
                 self._line += 1
                 self._column = 0
+                string += '\n'
             character = self._lines[self._line][self._column]
+            if character == '"' and string[-1] == '\\':
+                string += '"'
+                self._column += 1
+                character = self._lines[self._line][self._column]
         self._column += 1
         return f'"{string}"', None
 
-    def _fetch_comment(self) -> Tuple[str|None, Error|None]:
+    def _fetch_comment_or_divide(self) -> Tuple[str|None, Error|None]:
         first_character = self._lines[self._line][self._column]
         if self._column + 1 < len(self._lines[self._line]):
             if first_character == '/' and self._lines[self._line][self._column + 1] == '/':
                 comment = self._lines[self._line][self._column:]
-                self._line += 1
-                self._column = 0
+                self._column = len(self._lines[self._line])
                 return comment, None
-        return None, InvalidComment(self._filepath, self._line, self._column)
+            self._column += 1
+            return '/', None
+        return None, DecodeError(first_character, self._filepath, self._line, self._column)
