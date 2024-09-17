@@ -113,7 +113,7 @@ class TestLexer(TestCase):
         # then
         self.assertEqual(comment, '// Hello World')
         self.assertIsNone(error)
-        self.assertEqual(line, 2, 'line should be 2')
+        self.assertEqual(line, 1, 'line should be 1')
         self.assertEqual(column, 1, 'column should be 1')
 
     def test_detect_comment2(self):
@@ -127,7 +127,7 @@ class TestLexer(TestCase):
         # then
         self.assertEqual(comment, '// Hello World')
         self.assertIsNone(error)
-        self.assertEqual(line, 2, 'line should be 2')
+        self.assertEqual(line, 1, 'line should be 1')
         self.assertEqual(column, 1, 'column should be 1')
 
     def test_multi_line_string(self):

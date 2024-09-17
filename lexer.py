@@ -58,9 +58,10 @@ class Lexer():
                         self._line,
                         self._column
                     )
-            if self._column >= len(self._lines[self._line]):
-                self._line += 1
-                self._column = 0
+            if response is None or error is None:
+                if self._column >= len(self._lines[self._line]):
+                    self._line += 1
+                    self._column = 0
         return response, error, self._line + 1, start_column + 1
 
     def _fetch_word(self) -> Tuple[str|None, Error|None]:
@@ -115,7 +116,7 @@ class Lexer():
         if self._column + 1 < len(self._lines[self._line]):
             if first_character == '/' and self._lines[self._line][self._column + 1] == '/':
                 comment = self._lines[self._line][self._column:]
-                self._column = len(self._lines[self._line])
+                self._column = len(self._lines[self._line]) - 1
                 return comment, None
             self._column += 1
             return '/', None
