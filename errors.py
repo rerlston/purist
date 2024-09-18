@@ -20,7 +20,7 @@ class Error(ABC):
         Returns the error message in a preset layout for error reporting
         """
         message = self._message
-        message = f'{message} file: {self._filename}, '
+        message = f'{message} file: {self._filename},'
         message = f'{message} line: {self._line + 1}, column: {self._column + 1}'
         return message
 

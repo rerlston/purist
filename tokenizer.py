@@ -25,7 +25,7 @@ class TokenType(Enum):
     INTEGER_TYPE = 'INTEGER_TYPE'
     INTEGER_VALUE = 'INTEGER_VALUE'
     NUMBER_TYPE = 'NUMBER_TYPE'
-    NUMBER_VALUE = 'NUMBER_VALUE'
+    DECIMAL_VALUE = 'DECIMAL_VALUE'
     STRING_TYPE = 'STRING_TYPE'
     STRING_VALUE = 'STRING_VALUE'
     BOOLEAN_TYPE = 'BOOLEAN_TYPE'
@@ -157,10 +157,10 @@ class Tokenizer():
                 response.append(Token(TokenType.BOOLEAN_VALUE, filepath, line, column, next_value))
             elif next_value == 'null':
                 response.append(Token(TokenType.NULL, filepath, line, column))
-            elif next_value.isnumeric() and '.' not in next_value:
-                response.append(Token(TokenType.INTEGER_VALUE, filepath, line, column, next_value))
-            elif next_value.isnumeric():
-                response.append(Token(TokenType.NUMBER_VALUE, filepath, line, column, next_value))
+            elif self._is_float(next_value) and next_value.count('.') == 1:
+                response.append(Token(TokenType.DECIMAL_VALUE, filepath, line, column, float(next_value)))
+            elif self._is_integer(next_value):
+                response.append(Token(TokenType.INTEGER_VALUE, filepath, line, column, int(next_value)))
             elif next_value.startswith('"'):
                 response.append(Token(TokenType.STRING_VALUE, filepath, line, column, next_value))
             elif next_value == ',':
@@ -202,3 +202,17 @@ class Tokenizer():
 
         response.append(Token(TokenType.EOF, filepath, line, 0))
         return response
+
+    def _is_float(self, value: str) -> bool:
+        try:
+            float(value)
+            return True
+        except ValueError:
+            return False
+
+    def _is_integer(self, value: str) -> bool:
+        try:
+            int(value)
+            return True
+        except ValueError:
+            return False

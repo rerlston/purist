@@ -4,7 +4,7 @@ Purist source code lexer, reads source code and discovers words, numbers, operat
 
 from typing import Tuple
 
-from errors import DecodeError, Error, InvalidComment
+from errors import DecodeError, Error
 
 VALID_CHARACTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_1234567890'
 
@@ -30,6 +30,7 @@ class Lexer():
         response: str|None = None
         error: Error|None = None
         start_column: int = self._column
+        start_line: int = self._line
         while response is None and error is None and self._line < len(self._lines):
             while response is None and error is None and self._column < len(self._lines[self._line]):
                 start_column = self._column
@@ -39,7 +40,7 @@ class Lexer():
                     character = self._lines[self._line][self._column]
                 if character.isalpha():
                     response, error = self._fetch_word()
-                elif character.isnumeric() or character == '-':
+                elif character.isdigit() or character == '-':
                     response, error = self._fetch_number()
                 elif character == '"':
                     response, error = self._fetch_string()
@@ -62,7 +63,7 @@ class Lexer():
                 if self._column >= len(self._lines[self._line]):
                     self._line += 1
                     self._column = 0
-        return response, error, self._line + 1, start_column + 1
+        return response, error, start_line + 1, start_column + 1
 
     def _fetch_word(self) -> Tuple[str|None, Error|None]:
         word = ''
@@ -116,7 +117,7 @@ class Lexer():
         if self._column + 1 < len(self._lines[self._line]):
             if first_character == '/' and self._lines[self._line][self._column + 1] == '/':
                 comment = self._lines[self._line][self._column:]
-                self._column = len(self._lines[self._line]) - 1
+                self._column = len(self._lines[self._line])
                 return comment, None
             self._column += 1
             return '/', None

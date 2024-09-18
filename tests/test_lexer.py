@@ -141,5 +141,37 @@ class TestLexer(TestCase):
         # then
         self.assertEqual(string, '"Hello\nWorld"')
         self.assertIsNone(error)
-        self.assertEqual(line, 3, 'line should be 1')
+        self.assertEqual(line, 1, 'line should be 1')
         self.assertEqual(column, 1, 'column should be 1')
+
+    def test_invalid_decimal(self):
+        # given
+        text = "123.456.789 other stuff"
+        service = Lexer('test', text)
+
+        # when
+        value, error, line, column = service.next()
+
+        # then
+        self.assertIsNone(value)
+        self.assertIsNotNone(error)
+        if error is not None:
+            value = 'Unexpected character: "too many decimal points" file: test, line: 1, column: 8'
+            self.assertEqual(value, error.get_error())
+        self.assertEqual(line, 1, 'line should be 1')
+        self.assertEqual(column, 1, 'column should be 1')
+
+    def test_decode_error(self):
+        # given
+        text = "$$$"
+        service = Lexer('test', text)
+
+        # when
+        value, error, line, column = service.next()
+
+        # then
+        self.assertIsNone(value)
+        self.assertIsNotNone(error)
+        if error is not None:
+            value = 'Unexpected character: "$" file: test, line: 1, column: 1'
+            self.assertEqual(value, error.get_error())
