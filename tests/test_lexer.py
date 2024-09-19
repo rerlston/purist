@@ -175,3 +175,5 @@ class TestLexer(TestCase):
         if error is not None:
             value = 'Unexpected character: "$" file: test, line: 1, column: 1'
             self.assertEqual(value, error.get_error())
+        self.assertEqual(line, 1, 'line should be 1')
+        self.assertEqual(column, 1, 'column should be 1')

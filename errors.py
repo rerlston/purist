@@ -45,3 +45,11 @@ class UnexpectedKeyword(Error):
     def __init__(self, expected: str, found: str, filename: str, line: int, column: int) -> None:
         message = f'Unexpected keyword: "{found}" expected "{expected}"'
         super().__init__(message, filename, line, column)
+
+class InvalidClassName(Error):
+    """
+    Error for invalid class names
+    """
+    def __init__(self, name: str, filename: str, line: int, column: int) -> None:
+        message = f'Invalid class name: "{name}"'
+        super().__init__(message, filename, line, column)

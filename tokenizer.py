@@ -90,11 +90,53 @@ class Token():
 
     @property
     def type(self) -> TokenType:
+        """
+        Returns the type of the token
+
+        Returns:
+            TokenType: The type of the token
+        """
         return self._type
 
     @property
     def value(self) -> str|int|float|None:
+        """
+        Returns the value of the token
+
+        Returns:
+            str|int|float|None: The value of the token
+        """
         return self._value
+
+    @property
+    def filename(self) -> str:
+        """
+        Returns the filename where the token was derived
+
+        Returns:
+            str: The filename where the token was discovered
+        """
+        return self._filename
+
+    @property
+    def line(self) -> int:
+        """
+        Returns the line number where the token was derived
+
+        Returns:
+            int: The line number where the token was discovered
+        """
+        return self._line
+
+    @property
+    def column(self) -> int:
+        """
+        Returns the column number where the token was derived
+
+        Returns:
+            int: The column number where the token was discovered
+        """
+        return self._column
 
     def __repr__(self) -> str:
         print(self._type)
@@ -103,26 +145,21 @@ class Token():
         else:
             return f'({str(self._type)})'
 
-    @property
-    def filename(self) -> str:
-        return self._filename
-
-    @property
-    def line(self) -> int:
-        return self._line
-
-    @property
-    def column(self) -> int:
-        return self._column
-
 class Tokenizer():
     """
     Purist Tokenizer, converts discovered source code values into tokens
     """
-    def __init__(self) -> None:
-        pass
-
     def tokenize(self, filepath: str, text: str) -> List[Token]:
+        """
+        Converts discovered source code values into tokens
+
+        Args:
+            filepath (str): The source code filepath
+            text (str): The source code text
+
+        Returns:
+            List[Token]: The list of tokens
+        """
         response: List[Token] = []
         lexer: Lexer = Lexer(filepath, text)
         next_value, error, line, column = lexer.next()
@@ -157,10 +194,6 @@ class Tokenizer():
                 response.append(Token(TokenType.BOOLEAN_VALUE, filepath, line, column, next_value))
             elif next_value == 'null':
                 response.append(Token(TokenType.NULL, filepath, line, column))
-            elif self._is_float(next_value) and next_value.count('.') == 1:
-                response.append(Token(TokenType.DECIMAL_VALUE, filepath, line, column, float(next_value)))
-            elif self._is_integer(next_value):
-                response.append(Token(TokenType.INTEGER_VALUE, filepath, line, column, int(next_value)))
             elif next_value.startswith('"'):
                 response.append(Token(TokenType.STRING_VALUE, filepath, line, column, next_value))
             elif next_value == ',':
@@ -193,6 +226,14 @@ class Tokenizer():
                 response.append(Token(TokenType.LOGICAL_OR, filepath, line, column))
             elif next_value.startswith('//'):
                 response.append(Token(TokenType.COMMENT, filepath, line, column))
+            elif self._is_integer(next_value):
+                response.append(
+                    Token(TokenType.INTEGER_VALUE, filepath, line, column, int(next_value))
+                )
+            elif self._is_float(next_value) and next_value.count('.') == 1:
+                response.append(
+                    Token(TokenType.DECIMAL_VALUE, filepath, line, column, float(next_value))
+                )
             else:
                 response.append(Token(TokenType.IDENTIFIER, filepath, line, column, next_value))
             next_value, error, line, column = lexer.next()
@@ -204,6 +245,8 @@ class Tokenizer():
         return response
 
     def _is_float(self, value: str) -> bool:
+        if value[0] not in ['-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+            return False
         try:
             float(value)
             return True
@@ -211,6 +254,8 @@ class Tokenizer():
             return False
 
     def _is_integer(self, value: str) -> bool:
+        if value[0] not in ['-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+            return False
         try:
             int(value)
             return True

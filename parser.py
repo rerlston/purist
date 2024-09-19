@@ -2,14 +2,19 @@
 Purist Parser, entry point to parse the purist source code
 """
 import json
+import re
 import sys
 
 from os.path import join as path
 
 import time
 from typing import Any, Dict, List, Tuple
-from errors import UnexpectedKeyword
+from errors import InvalidClassName, UnexpectedKeyword
 from tokenizer import Token, TokenType, Tokenizer
+
+PASCAL_CASE = r'^[A-Z](([a-zA-Z0-9]+[A-Z]?)*)$'
+CAMEL_CASE = r'^[a-z]|[A-Z0-9])[a-z]*'
+CONSTANT = r'^[A-Z][A-Z0-9_][A-Z]+$'
 
 class Node():
     """
@@ -22,9 +27,17 @@ class Node():
 
     @property
     def children(self) -> 'List[Node]|None':
+        """
+        Returns the children of the node
+        """
         return self._children
 
     def add_child(self, node: 'Node|None') -> None:
+        """
+        Adds a child to the parent (current) node
+        Args:
+            node: the node to add as a child
+        """
         if node is not None:
             if self._children is None:
                 self._children = []
@@ -32,6 +45,12 @@ class Node():
 
     @property
     def value(self) -> str|int|float|None:
+        """
+        Returns the value of the node
+
+        Returns:
+            str|int|float|None: the value of the node
+        """
         return self._value
 
     @value.setter
@@ -121,6 +140,14 @@ class Parser():
         class_node: Node | None = None
         if current_token.type == TokenType.IDENTIFIER:
             class_name = str(current_token.value)
+            if re.match(PASCAL_CASE, class_name) is None:
+                error = InvalidClassName(
+                    class_name,
+                    current_token.filename,
+                    current_token.line,
+                    current_token.column
+                )
+                raise ValueError(error.get_error())
             class_node = Node('class', class_name)
             index += 1
         else:

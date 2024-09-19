@@ -8,10 +8,12 @@ from errors import DecodeError, Error
 
 VALID_CHARACTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_1234567890'
 
+
 class Lexer():
     """
     Purist Lexer, reads source code and discovers words, numbers, operators, etc
     """
+
     def __init__(self, filepath: str, text: str) -> None:
         self._filepath = filepath
         self._text = text
@@ -19,7 +21,7 @@ class Lexer():
         self._column = 0
         self._lines = text.splitlines()
 
-    def next(self) -> Tuple[str|None, Error|None, int, int]:
+    def next(self) -> Tuple[str | None, Error | None, int, int]:
         """
         Reads the next source code value from the file
         Returns a tuple of a discovered value and a specific error if encountered
@@ -27,12 +29,14 @@ class Lexer():
         Returns:
             Tuple[str|None, Error|None]: (discovered value, error)
         """
-        response: str|None = None
-        error: Error|None = None
+        response: str | None = None
+        error: Error | None = None
         start_column: int = self._column
         start_line: int = self._line
         while response is None and error is None and self._line < len(self._lines):
-            while response is None and error is None and self._column < len(self._lines[self._line]):
+            while response is None and error is None and self._column < len(
+                self._lines[self._line]
+            ):
                 start_column = self._column
                 character: str = self._lines[self._line][self._column]
                 while character == ' ' or character == '\t':
@@ -47,9 +51,9 @@ class Lexer():
                 elif character == '/':
                     response, error = self._fetch_comment_or_divide()
                 elif character in [
-                        '[', ']', '{', '}', '(', ')', ',',
-                        ':', '=', '<', '>', '.', '!', '|'
-                    ]:
+                    '[', ']', '{', '}', '(', ')', ',',
+                    ':', '=', '<', '>', '.', '!', '|'
+                ]:
                     self._column += 1
                     response = character
                 else:
@@ -65,7 +69,7 @@ class Lexer():
                     self._column = 0
         return response, error, start_line + 1, start_column + 1
 
-    def _fetch_word(self) -> Tuple[str|None, Error|None]:
+    def _fetch_word(self) -> Tuple[str | None, Error | None]:
         word = ''
         character = self._lines[self._line][self._column]
         while character in VALID_CHARACTERS and self._column < len(self._lines[self._line]):
@@ -75,7 +79,7 @@ class Lexer():
                 character = self._lines[self._line][self._column]
         return word, None
 
-    def _fetch_number(self) -> Tuple[str|None, Error|None]:
+    def _fetch_number(self) -> Tuple[str | None, Error | None]:
         number = ''
         character = self._lines[self._line][self._column]
         while character in '-1234567890.' and self._column < len(self._lines[self._line]):
@@ -93,7 +97,7 @@ class Lexer():
                 character = self._lines[self._line][self._column]
         return number, None
 
-    def _fetch_string(self) -> Tuple[str|None, Error|None]:
+    def _fetch_string(self) -> Tuple[str | None, Error | None]:
         string = ''
         self._column += 1
         character = self._lines[self._line][self._column]
@@ -112,7 +116,7 @@ class Lexer():
         self._column += 1
         return f'"{string}"', None
 
-    def _fetch_comment_or_divide(self) -> Tuple[str|None, Error|None]:
+    def _fetch_comment_or_divide(self) -> Tuple[str | None, Error | None]:
         first_character = self._lines[self._line][self._column]
         if self._column + 1 < len(self._lines[self._line]):
             if first_character == '/' and self._lines[self._line][self._column + 1] == '/':
