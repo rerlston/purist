@@ -9,18 +9,23 @@ from os.path import join as path
 
 import time
 from typing import Any, Dict, List, Tuple
-from errors import InvalidClassName, UnexpectedKeyword
+from errors import InvalidClassName, InvalidImportStatement, InvalidInterfaceName, UnexpectedKeyword
 from tokenizer import Token, TokenType, Tokenizer
 
 PASCAL_CASE = r'^[A-Z](([a-zA-Z0-9]+[A-Z]?)*)$'
+CLASS_CASE = PASCAL_CASE
+INTERFACE_CASE = PASCAL_CASE
 CAMEL_CASE = r'^[a-z]|[A-Z0-9])[a-z]*'
+VARIABLE_CASE = CAMEL_CASE
 CONSTANT = r'^[A-Z][A-Z0-9_][A-Z]+$'
+
 
 class Node():
     """
     Abstract Syntax Tree Node
     """
-    def __init__(self, node_name: str, value: str|int|float|None = None) -> None:
+
+    def __init__(self, node_name: str, value: str | int | float | None = None) -> None:
         self._node_name = node_name
         self._value = value
         self._children: 'List[Node]|None' = None
@@ -44,7 +49,7 @@ class Node():
             self._children.append(node)
 
     @property
-    def value(self) -> str|int|float|None:
+    def value(self) -> str | int | float | None:
         """
         Returns the value of the node
 
@@ -54,7 +59,7 @@ class Node():
         return self._value
 
     @value.setter
-    def value(self, value: str|int|float) -> None:
+    def value(self, value: str | int | float) -> None:
         self._value = value
 
     def __repr__(self) -> str:
@@ -69,17 +74,19 @@ class Node():
             response['children'] = children
         return json.dumps(response, indent=4)
 
+
 class Parser():
     """
     Purist Parser, once it has tokens it checks if the tokens can form a valid AST
     """
+
     def __init__(self, src_folder: str) -> None:
         self._tokenizer = Tokenizer()
         self._src_folder = src_folder
         self._parsed_files: List[str] = []
         self._parsed_file_nodes: Dict[str, Node] = {}
 
-    def parse(self, file_path: str) -> Node|None:
+    def parse(self, file_path: str) -> Node | None:
         """
         Parse a file and return a root Node of the AST
 
@@ -133,14 +140,12 @@ class Parser():
                 token_index += 1
         return root_node
 
-    def _parse_class(self, tokens: List[Token], index: int) -> Tuple[Node, int]:
-        index += 1
-        class_name: str|None = None
+    def _parse_class_identifier(self, tokens: List[Token], index: int) -> Tuple[Node, int]:
         current_token = tokens[index]
         class_node: Node | None = None
         if current_token.type == TokenType.IDENTIFIER:
             class_name = str(current_token.value)
-            if re.match(PASCAL_CASE, class_name) is None:
+            if re.match(CLASS_CASE, class_name) is None:
                 error = InvalidClassName(
                     class_name,
                     current_token.filename,
@@ -159,47 +164,67 @@ class Parser():
                 current_token.column
             )
             raise ValueError(error.get_error())
+        return class_node, index
+
+    def _parse_class_extends(self, tokens: List[Token], index: int) -> Tuple[Node|None, int]:
+        token, index = self._next_token(tokens, index)
+        if token.type == TokenType.EXTENDS:
+            token, index = self._expected_next_token(tokens, index, TokenType.IDENTIFIER)
+            if re.match(CLASS_CASE, str(token.value)) is None:
+                error = InvalidClassName(
+                    str(token.value),
+                    token.filename,
+                    token.line,
+                    token.column
+                )
+                raise ValueError(error.get_error())
+            return Node('extends', str(token.value)), index
+        return None, index
+
+    def _is_token_one_of(self, tokens: List[Token], index: int, types: List[TokenType]) -> bool:
         if index < len(tokens):
             current_token = tokens[index]
-            if current_token.type == TokenType.EXTENDS:
-                index += 1
-                if index < len(tokens):
-                    current_token = tokens[index]
-                    if current_token.type == TokenType.IDENTIFIER:
-                        class_node.add_child(Node('extends', str(current_token.value)))
-                        index += 1
+            if current_token.type in types:
+                return True
+        return False
+
+    def _parse_class_implements(
+            self,
+            tokens: List[Token],
+            index: int
+        ) -> Tuple[List[Node], int]:
+        response: List[Node] = []
+        token, index = self._next_token(tokens, index)
+        if token.type == TokenType.IMPLEMENTS:
+            token, index = self._expected_next_token(tokens, index, TokenType.IDENTIFIER)
+            while self._is_token_one_of(tokens, index, [
+                    TokenType.IDENTIFIER,
+                    TokenType.COMMA
+            ]):
+                if token.type == TokenType.IDENTIFIER:
+                    if re.match(INTERFACE_CASE, str(token.value)) is not None:
+                        response.append(Node('implements', str(token.value)))
                     else:
-                        error = UnexpectedKeyword(
-                            'Class Identifier',
-                            str(current_token.type.name),
-                            current_token.filename,
-                            current_token.line,
-                            current_token.column
+                        error = InvalidInterfaceName(
+                            str(token.value),
+                            token.filename,
+                            token.line,
+                            token.column
                         )
                         raise ValueError(error.get_error())
-                if index < len(tokens):
-                    current_token = tokens[index]
-            if index < len(tokens):
-                current_token = tokens[index]
-                if current_token.type == TokenType.IMPLEMENTS:
-                    index += 1
-                    if index < len(tokens):
-                        current_token = tokens[index]
-                        if current_token.type == TokenType.IDENTIFIER:
-                            while current_token.type == TokenType.IDENTIFIER or current_token.type == TokenType.COMMA:
-                                if current_token.type == TokenType.IDENTIFIER:
-                                    class_node.add_child(Node('implements', str(current_token.value)))
-                                index += 1
-                                current_token = tokens[index]
-                        else:
-                            error = UnexpectedKeyword(
-                                'Class Identifier',
-                                str(current_token.type.name),
-                                current_token.filename,
-                                current_token.line,
-                                current_token.column
-                            )
-                            raise ValueError(error.get_error())
+                token, index = self._next_token(tokens, index)
+        return response, index
+
+    def _parse_class(self, tokens: List[Token], index: int) -> Tuple[Node, int]:
+        index += 1
+        class_node, index = self._parse_class_identifier(tokens, index)
+        extends_node, index = self._parse_class_extends(tokens, index)
+        if extends_node is not None:
+            class_node.add_child(extends_node)
+        implements_nodes, index = self._parse_class_implements(tokens, index)
+        if len(implements_nodes) > 0:
+            for implements_node in implements_nodes:
+                class_node.add_child(implements_node)
         return class_node, index
 
     def _parse_import_statements(self, tokens: List[Token], index: int) -> Tuple[List[Node], int]:
@@ -212,85 +237,80 @@ class Parser():
             current_token = tokens[index]
         return response, index
 
-    def _parse_import_statement(self, tokens: List[Token], index: int) -> Tuple[Node|None, int]:
-        current_token = tokens[index]
+    def _next_token(self, tokens: List[Token], index: int) -> Tuple[Token, int]:
         index += 1
-        import_expression: str|None = None
-        if index < len(tokens):
-            current_token = tokens[index]
-            if current_token.type == TokenType.BUILTIN:
-                import_expression = str(current_token.type.name)
-                index += 1
-            elif current_token.type == TokenType.IDENTIFIER:
-                import_expression = ''
-                while current_token.type == TokenType.IDENTIFIER or current_token.type == TokenType.FULL_STOP:
-                    if current_token.type == TokenType.IDENTIFIER:
-                        import_expression += str(current_token.value)
-                    if current_token.type == TokenType.FULL_STOP:
-                        import_expression += '.'
-                    index += 1
-                    if index < len(tokens):
-                        current_token = tokens[index]
-            else:
-                value = str(current_token.type.name)
-                if current_token.value is not None:
-                    value = str(current_token.value)
-                error = UnexpectedKeyword(
-                    'Builtin or identifier',
-                    value,
-                    current_token.filename,
-                    current_token.line,
-                    current_token.column
-                )
-                raise ValueError(error.get_error())
-            if index < len(tokens):
-                current_token = tokens[index]
-                if current_token.type == TokenType.REQUIRE:
-                    index += 1
-                else:
-                    error = UnexpectedKeyword(
-                        'require',
-                        str(current_token.value),
-                        current_token.filename,
-                        current_token.line,
-                        current_token.column
-                    )
-                    raise ValueError(error.get_error())
-                if index < len(tokens):
-                    current_token = tokens[index]
-                    if current_token.type == TokenType.LEFT_SQUARE_BRACKET:
-                        index += 1
-                    else:
-                        error = UnexpectedKeyword(
-                            '[',
-                            str(current_token.value),
-                            current_token.filename,
-                            current_token.line,
-                            current_token.column
-                        )
-                        raise ValueError(error.get_error())
-                    if index < len(tokens):
-                        current_token = tokens[index]
-                        if current_token.type == TokenType.IDENTIFIER:
-                            index += 1
-                        else:
-                            error = UnexpectedKeyword(
-                                'class or interface name',
-                                str(current_token.value),
-                                current_token.filename,
-                                current_token.line,
-                                current_token.column
-                            )
-                            raise ValueError(error.get_error())
-                    else:
-                        raise ValueError('Unexpected end of file')
-                else:
-                    raise ValueError('Unexpected end of file')
-            else:
-                raise ValueError('Unexpected end of file')
-        else:
+        if index >= len(tokens):
             raise ValueError('Unexpected end of file')
+        return tokens[index], index
 
+    def _expected_next_token(
+            self,
+            tokens: List[Token],
+            index: int,
+            token_type: TokenType
+        ) -> Tuple[Token, int]:
+        current_token, index = self._next_token(tokens, index)
+        if current_token.type != token_type:
+            error = UnexpectedKeyword(
+                str(token_type.name),
+                str(current_token.type.name),
+                current_token.filename,
+                current_token.line,
+                current_token.column
+            )
+            raise ValueError(error.get_error())
+        return current_token, index
+
+    def _expect_next_one_of_token(
+            self,
+            tokens: List[Token],
+            index: int,
+            expected_tokens: List[TokenType]
+        ) -> Tuple[Token, int]:
+        current_token, index = self._next_token(tokens, index)
+        if current_token.type not in expected_tokens:
+            error = UnexpectedKeyword(
+                ' or '.join([str(t.name) for t in expected_tokens]),
+                str(current_token.type.name),
+                current_token.filename,
+                current_token.line,
+                current_token.column
+            )
+            raise ValueError(error.get_error())
+        return current_token, index
+
+    def _parse_import_statement(self, tokens: List[Token], index: int) -> Tuple[Node | None, int]:
+        import_expression: str | None = None
+        token, index = self._expect_next_one_of_token(
+            tokens,
+            index,
+            [TokenType.BUILTIN, TokenType.IDENTIFIER]
+        )
+        if token.type == TokenType.BUILTIN:
+            import_expression = str(token.type.name)
+        elif token.type == TokenType.IDENTIFIER:
+            import_expression = ''
+            while self._is_token_one_of(tokens, index, [
+                TokenType.IDENTIFIER,
+                TokenType.FULL_STOP
+            ]):
+                if token.type == TokenType.IDENTIFIER:
+                    import_expression += str(token.value)
+                elif token.type == TokenType.FULL_STOP:
+                    import_expression += '.'
+                token, index = self._next_token(tokens, index)
+            index = index - 1
+        token, index = self._expected_next_token(tokens, index, TokenType.REQUIRE)
+        token, index = self._expected_next_token(tokens, index, TokenType.LEFT_SQUARE_BRACKET)
+        token, index = self._expected_next_token(tokens, index, TokenType.IDENTIFIER)
+
+        if import_expression is None:
+            error = InvalidImportStatement(
+                token.filename,
+                token.line,
+                token.column
+            )
+            raise ValueError(error.get_error())
         if import_expression == 'BUILTIN':
             return Node('builtin'), index
         else:
@@ -309,6 +329,7 @@ def main(filename: str) -> None:
     end = time.time()
     print(ast)
     print(f'Parsed in {end - start} seconds')
+
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:

@@ -53,3 +53,19 @@ class InvalidClassName(Error):
     def __init__(self, name: str, filename: str, line: int, column: int) -> None:
         message = f'Invalid class name: "{name}"'
         super().__init__(message, filename, line, column)
+
+class InvalidInterfaceName(Error):
+    """
+    Error for invalid interface names
+    """
+    def __init__(self, name: str, filename: str, line: int, column: int) -> None:
+        message = f'Invalid interface name: "{name}"'
+        super().__init__(message, filename, line, column)
+
+class InvalidImportStatement(Error):
+    """
+    Error for invalid import statements
+    """
+    def __init__(self, filename: str, line: int, column: int) -> None:
+        message = 'Invalid import statement'
+        super().__init__(message, filename, line, column)
