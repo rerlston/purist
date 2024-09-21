@@ -317,6 +317,32 @@ class TestTokenizer(TestCase):
         self.assertEqual(TokenType.EOF, token.type)
         self.assertIsNone(token.value)
 
+    def test_class_with_empty_class_definition(self):
+        # given
+        tokenizer = Tokenizer()
+        code = 'class Test {\n}'
+
+        # when
+        tokens = tokenizer.tokenize('unittest', code)
+
+        # then
+        self.assertIsNotNone(tokens)
+        self.assertEqual(5, len(tokens))
+        token = tokens[0]
+        self.assertEqual(TokenType.CLASS, token.type)
+        self.assertIsNone(token.value)
+        token = tokens[1]
+        self.assertEqual(TokenType.IDENTIFIER, token.type)
+        self.assertEqual('Test', token.value)
+        token = tokens[2]
+        self.assertEqual(TokenType.LEFT_CURLY_BRACKET, token.type)
+        self.assertIsNone(token.value)
+        token = tokens[3]
+        self.assertEqual(TokenType.RIGHT_CURLY_BRACKET, token.type)
+        self.assertIsNone(token.value)
+        token = tokens[4]
+        self.assertEqual(TokenType.EOF, token.type)
+
     def test_interface_to_tokens(self):
         # given
         tokenizer = Tokenizer()
@@ -428,5 +454,84 @@ class TestTokenizer(TestCase):
         self.assertEqual(TokenType.INTEGER_TYPE, token.type)
         self.assertIsNone(token.value)
         token = tokens[3]
+        self.assertEqual(TokenType.EOF, token.type)
+        self.assertIsNone(token.value)
+
+    def test_multiline_code_to_tokens(self):
+        # given
+        tokenizer = Tokenizer()
+        code = 'from b require [B]\n\nclass A implements B{\n}'
+
+        # when
+        tokens = tokenizer.tokenize('unittest', code)
+
+        # then
+        self.assertIsNotNone(tokens)
+        self.assertEqual(13, len(tokens))
+        token = tokens[0]
+        # 'from'
+        self.assertEqual(TokenType.FROM, token.type)
+        self.assertEqual(1, token.line)
+        self.assertEqual(1, token.column)
+        token = tokens[1]
+        # 'b'
+        self.assertEqual(TokenType.IDENTIFIER, token.type)
+        self.assertEqual('b', token.value)
+        self.assertEqual(1, token.line)
+        self.assertEqual(6, token.column)
+        token = tokens[2]
+        # 'require
+        self.assertEqual(TokenType.REQUIRE, token.type)
+        self.assertEqual(1, token.line)
+        self.assertEqual(8, token.column)
+        token = tokens[3]
+        # '['
+        self.assertEqual(TokenType.LEFT_SQUARE_BRACKET, token.type)
+        self.assertEqual(1, token.line)
+        self.assertEqual(16, token.column)
+        token = tokens[4]
+        # 'B'
+        self.assertEqual(TokenType.IDENTIFIER, token.type)
+        self.assertEqual('B', token.value)
+        self.assertEqual(1, token.line)
+        self.assertEqual(17, token.column)
+        token = tokens[5]
+        # ']'
+        self.assertEqual(TokenType.RIGHT_SQUARE_BRACKET, token.type)
+        self.assertEqual(1, token.line)
+        self.assertEqual(18, token.column)
+        token = tokens[6]
+        # 'class'
+        self.assertEqual(TokenType.CLASS, token.type)
+        self.assertEqual(3, token.line)
+        self.assertEqual(1, token.column)
+        token = tokens[7]
+        # 'A'
+        self.assertEqual(TokenType.IDENTIFIER, token.type)
+        self.assertEqual('A', token.value)
+        self.assertEqual(3, token.line)
+        self.assertEqual(7, token.column)
+        token = tokens[8]
+        # 'implements'
+        self.assertEqual(TokenType.IMPLEMENTS, token.type)
+        self.assertEqual(3, token.line)
+        self.assertEqual(9, token.column)
+        token = tokens[9]
+        # 'B'
+        self.assertEqual(TokenType.IDENTIFIER, token.type)
+        self.assertEqual('B', token.value)
+        self.assertEqual(3, token.line)
+        self.assertEqual(20, token.column)
+        token = tokens[10]
+        # '{'
+        self.assertEqual(TokenType.LEFT_CURLY_BRACKET, token.type)
+        self.assertEqual(3, token.line)
+        self.assertEqual(21, token.column)
+        token = tokens[11]
+        # '}'
+        self.assertEqual(TokenType.RIGHT_CURLY_BRACKET, token.type)
+        self.assertEqual(4, token.line)
+        self.assertEqual(1, token.column)
+        token = tokens[12]
         self.assertEqual(TokenType.EOF, token.type)
         self.assertIsNone(token.value)

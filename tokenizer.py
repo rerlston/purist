@@ -24,7 +24,7 @@ class TokenType(Enum):
     IDENTIFIER = 'IDENTIFIER'
     INTEGER_TYPE = 'INTEGER_TYPE'
     INTEGER_VALUE = 'INTEGER_VALUE'
-    NUMBER_TYPE = 'NUMBER_TYPE'
+    DECIMAL_TYPE = 'NUMBER_TYPE'
     DECIMAL_VALUE = 'DECIMAL_VALUE'
     STRING_TYPE = 'STRING_TYPE'
     STRING_VALUE = 'STRING_VALUE'
@@ -141,9 +141,9 @@ class Token():
     def __repr__(self) -> str:
         print(self._type)
         if self._value is not None:
-            return f'({str(self._type)} = {self._value})'
+            return f'({self._type.__repr__()}[{self.line}:{self.column}] = {self._value})'
         else:
-            return f'({str(self._type)})'
+            return f'({self._type.__repr__()}[{self.line}:{self.column}])'
 
 class Tokenizer():
     """
@@ -189,7 +189,7 @@ class Tokenizer():
             elif next_value == 'integer':
                 response.append(Token(TokenType.INTEGER_TYPE, filepath, line, column))
             elif next_value == 'number':
-                response.append(Token(TokenType.NUMBER_TYPE, filepath, line, column))
+                response.append(Token(TokenType.DECIMAL_TYPE, filepath, line, column))
             elif next_value == 'false' or next_value == 'true':
                 response.append(Token(TokenType.BOOLEAN_VALUE, filepath, line, column, next_value))
             elif next_value == 'null':

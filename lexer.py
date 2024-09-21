@@ -32,16 +32,17 @@ class Lexer():
         response: str | None = None
         error: Error | None = None
         start_column: int = self._column
-        start_line: int = self._line
+        start_line: int = 0
         while response is None and error is None and self._line < len(self._lines):
+            start_line = self._line
             while response is None and error is None and self._column < len(
                 self._lines[self._line]
             ):
-                start_column = self._column
                 character: str = self._lines[self._line][self._column]
                 while character == ' ' or character == '\t':
                     self._column += 1
                     character = self._lines[self._line][self._column]
+                start_column = self._column
                 if character.isalpha():
                     response, error = self._fetch_word()
                 elif character.isdigit() or character == '-':

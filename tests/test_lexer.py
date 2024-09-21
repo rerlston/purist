@@ -1,5 +1,7 @@
+from typing import List
 from unittest import TestCase
 
+from errors import Error
 from lexer import Lexer
 
 
@@ -177,3 +179,243 @@ class TestLexer(TestCase):
             self.assertEqual(value, error.get_error())
         self.assertEqual(line, 1, 'line should be 1')
         self.assertEqual(column, 1, 'column should be 1')
+
+    def test_multiline_simple_string_retrieve_multiple_entries(self):
+        # given
+        text = 'Hello\nWorld'
+        service = Lexer('test', text)
+
+        # when
+        string1, error1, line1, column1 = service.next()
+        string2, error2, line2, column2 = service.next()
+
+        # then
+        self.assertEqual(string1, 'Hello')
+        self.assertIsNone(error1)
+        self.assertEqual(line1, 1, 'line should be 1')
+        self.assertEqual(column1, 1, 'column should be 1')
+        self.assertEqual(string2, 'World')
+        self.assertIsNone(error2)
+        self.assertEqual(line2, 2, 'line should be 2')
+        self.assertEqual(column2, 1, 'column should be 1')
+
+    def test_multiline_string_with_items_in_square_brackets(self):
+        # given
+        text = 'from b require [B]\n\nclass A implements B{\n}'
+        service = Lexer('test', text)
+
+        # when
+        strings: List[str|int|float|None] = []
+        errors: List[Error|None] = []
+        lines: List[int] = []
+        columns: List[int] = []
+        for index in range(12):
+            string, error, line, column = service.next()
+            strings.append(string)
+            errors.append(error)
+            lines.append(line)
+            columns.append(column)
+
+        # then
+        # 'from'
+        self.assertEqual(strings[0], 'from')
+        self.assertIsNone(errors[0])
+        self.assertEqual(lines[0], 1, 'line should be 1')
+        self.assertEqual(columns[0], 1, 'column should be 1')
+
+        # 'b'
+        self.assertEqual(strings[1], 'b')
+        self.assertIsNone(errors[1])
+        self.assertEqual(lines[1], 1, 'line should be 1')
+        self.assertEqual(columns[1], 6, 'column should be 6')
+
+        # 'require'
+        self.assertEqual(strings[2], 'require')
+        self.assertIsNone(errors[2])
+        self.assertEqual(lines[2], 1, 'line should be 1')
+        self.assertEqual(columns[2], 8, 'column should be 8')
+
+        # '['
+        self.assertEqual(strings[3], '[')
+        self.assertIsNone(errors[3])
+        self.assertEqual(lines[3], 1, 'line should be 1')
+        self.assertEqual(columns[3], 16, 'column should be 16')
+
+        # 'B'
+        self.assertEqual(strings[4], 'B')
+        self.assertIsNone(errors[4])
+        self.assertEqual(lines[4], 1, 'line should be 1')
+        self.assertEqual(columns[4], 17, 'column should be 17')
+
+        # ']'
+        self.assertEqual(strings[5], ']')
+        self.assertIsNone(errors[5])
+        self.assertEqual(lines[5], 1, 'line should be 1')
+        self.assertEqual(columns[5], 18, 'column should be 18')
+
+        # 'class'
+        self.assertEqual(strings[6], 'class')
+        self.assertIsNone(errors[6])
+        self.assertEqual(lines[6], 3, 'line should be 3')
+        self.assertEqual(columns[6], 1, 'column should be 1')
+
+        # 'A'
+        self.assertEqual(strings[7], 'A')
+        self.assertIsNone(errors[7])
+        self.assertEqual(lines[7], 3, 'line should be 3')
+        self.assertEqual(columns[7], 7, 'column should be 7')
+
+        # 'implements'
+        self.assertEqual(strings[8], 'implements')
+        self.assertIsNone(errors[8])
+        self.assertEqual(lines[8], 3, 'line should be 3')
+        self.assertEqual(columns[8], 9, 'column should be 9')
+
+        # 'B'
+        self.assertEqual(strings[9], 'B')
+        self.assertIsNone(errors[9])
+        self.assertEqual(lines[9], 3, 'line should be 3')
+        self.assertEqual(columns[9], 20, 'column should be 20')
+
+        # '{'
+        self.assertEqual(strings[10], '{')
+        self.assertIsNone(errors[10])
+        self.assertEqual(lines[10], 3, 'line should be 3')
+        self.assertEqual(columns[10], 21, 'column should be 21')
+
+        # '}''
+        self.assertEqual(strings[11], '}')
+        self.assertIsNone(errors[11])
+        self.assertEqual(lines[11], 4, 'line should be 4')
+        self.assertEqual(columns[11], 1, 'column should be 1')
+
+    def test_comment(self):
+        # given
+        text = '// Hello World\nclass A {}'
+        service = Lexer('test', text)
+
+        # when
+        strings: List[str|int|float|None] = []
+        errors: List[Error|None] = []
+        lines: List[int] = []
+        columns: List[int] = []
+        for index in range(5):
+            string, error, line, column = service.next()
+            strings.append(string)
+            errors.append(error)
+            lines.append(line)
+            columns.append(column)
+
+        # then
+        # comment
+        self.assertEqual(strings[0], '// Hello World')
+        self.assertIsNone(errors[0])
+        self.assertEqual(lines[0], 1, 'line should be 1')
+        self.assertEqual(columns[0], 1, 'column should be 1')
+
+        # 'class'
+        self.assertEqual(strings[1], 'class')
+        self.assertIsNone(errors[1])
+        self.assertEqual(lines[1], 2, 'line should be 2')
+        self.assertEqual(columns[1], 1, 'column should be 1')
+
+        # 'A'
+        self.assertEqual(strings[2], 'A')
+        self.assertIsNone(errors[2])
+        self.assertEqual(lines[2], 2, 'line should be 2')
+        self.assertEqual(columns[2], 7, 'column should be 7')
+
+        # '{'
+        self.assertEqual(strings[3], '{')
+        self.assertIsNone(errors[3])
+        self.assertEqual(lines[3], 2, 'line should be 2')
+        self.assertEqual(columns[3], 9, 'column should be 9')
+
+        # '}'
+        self.assertEqual(strings[4], '}')
+        self.assertIsNone(errors[4])
+        self.assertEqual(lines[4], 2, 'line should be 2')
+        self.assertEqual(columns[4], 10, 'column should be 10')
+
+    def test_multiline_code_with_commen(self):
+        # given
+        text = 'from b require [B]\n// comment\n\nclass A implements B{\n}'
+        service = Lexer('test', text)
+
+        # when
+        strings: List[str|int|float|None] = []
+        errors: List[Error|None] = []
+        lines: List[int] = []
+        columns: List[int] = []
+        for index in range(13):
+            string, error, line, column = service.next()
+            strings.append(string)
+            errors.append(error)
+            lines.append(line)
+            columns.append(column)
+
+        # then
+        # 'from'
+        self.assertEqual(strings[0], 'from')
+        self.assertIsNone(errors[0])
+        self.assertEqual(lines[0], 1, 'line should be 1')
+        self.assertEqual(columns[0], 1, 'column should be 1')
+
+        # 'b'
+        self.assertEqual(strings[1], 'b')
+        self.assertIsNone(errors[1])
+        self.assertEqual(lines[1], 1, 'line should be 1')
+        self.assertEqual(columns[1], 6, 'column should be 6')
+        # 'require'
+        self.assertEqual(strings[2], 'require')
+        self.assertIsNone(errors[2])
+        self.assertEqual(lines[2], 1, 'line should be 1')
+        self.assertEqual(columns[2], 8, 'column should be 8')
+
+        # '['
+        self.assertEqual(strings[3], '[')
+        self.assertIsNone(errors[3])
+        self.assertEqual(lines[3], 1, 'line should be 1')
+        self.assertEqual(columns[3], 16, 'column should be 16')
+
+        # 'B'
+        self.assertEqual(strings[4], 'B')
+        self.assertIsNone(errors[4])
+        self.assertEqual(lines[4], 1, 'line should be 1')
+        self.assertEqual(columns[4], 17, 'column should be 17')
+
+        # ']'
+        self.assertEqual(strings[5], ']')
+        self.assertIsNone(errors[5])
+        self.assertEqual(lines[5], 1, 'line should be 1')
+        self.assertEqual(columns[5], 18, 'column should be 18')
+
+        # 'comment'
+        self.assertEqual(strings[6], '// comment')
+        self.assertIsNone(errors[6])
+        self.assertEqual(lines[6], 2, 'line should be 2')
+        self.assertEqual(columns[6], 1, 'column should be 1')
+
+        # 'class'
+        self.assertEqual(strings[7], 'class')
+        self.assertIsNone(errors[7])
+        self.assertEqual(lines[7], 4, 'line should be 3')
+        self.assertEqual(columns[7], 1, 'column should be 1')
+
+        # 'A'
+        self.assertEqual(strings[8], 'A')
+        self.assertIsNone(errors[8])
+        self.assertEqual(lines[8], 4, 'line should be 3')
+        self.assertEqual(columns[8], 7, 'column should be 7')
+
+        # 'implements'
+        self.assertEqual(strings[9], 'implements')
+        self.assertIsNone(errors[9])
+        self.assertEqual(lines[9], 4, 'line should be 3')
+        self.assertEqual(columns[9], 9, 'column should be 9')
+
+        # 'B'
+        self.assertEqual(strings[10], 'B')
+        self.assertIsNone(errors[10])
+        self.assertEqual(lines[10], 4, 'line should be 3')
+        self.assertEqual(columns[10], 20, 'column should be 20')

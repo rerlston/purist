@@ -69,3 +69,19 @@ class InvalidImportStatement(Error):
     def __init__(self, filename: str, line: int, column: int) -> None:
         message = 'Invalid import statement'
         super().__init__(message, filename, line, column)
+
+class InvalidVariableName(Error):
+    """
+    Error for invalid variable names
+    """
+    def __init__(self, name: str, filename: str, line: int, column: int) -> None:
+        message = f'Invalid variable name: "{name}"'
+        super().__init__(message, filename, line, column)
+
+class InvalidMethodName(Error):
+    """
+    Error for invalid method names
+    """
+    def __init__(self, name: str, filename: str, line: int, column: int) -> None:
+        message = f'Invalid method name: "{name}"'
+        super().__init__(message, filename, line, column)
