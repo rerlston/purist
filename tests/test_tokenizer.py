@@ -135,7 +135,7 @@ class TestTokenizer(TestCase):
         self.assertEqual(2, len(tokens))
         token = tokens[0]
         self.assertEqual(TokenType.COMMENT, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
 
     def test_builtin_import_as_tokens(self):
         # given
@@ -150,22 +150,27 @@ class TestTokenizer(TestCase):
         self.assertEqual(7, len(tokens))
         token = tokens[0]
         self.assertEqual(TokenType.FROM, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('from', token.value)
         token = tokens[1]
         self.assertEqual(TokenType.BUILTIN, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('Builtin', token.value)
         token = tokens[2]
         self.assertEqual(TokenType.REQUIRE, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('require', token.value)
         token = tokens[3]
         self.assertEqual(TokenType.LEFT_SQUARE_BRACKET, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('[', token.value)
         token = tokens[4]
         self.assertEqual(TokenType.IDENTIFIER, token.type)
         self.assertEqual('ABC', token.value)
         token = tokens[5]
         self.assertEqual(TokenType.RIGHT_SQUARE_BRACKET, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual(']', token.value)
         token = tokens[6]
         self.assertEqual(TokenType.EOF, token.type)
         self.assertIsNone(token.value)
@@ -183,28 +188,33 @@ class TestTokenizer(TestCase):
         self.assertEqual(9, len(tokens))
         token = tokens[0]
         self.assertEqual(TokenType.FROM, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('from', token.value)
         token = tokens[1]
         self.assertEqual(TokenType.IDENTIFIER, token.type)
         self.assertEqual('sample', token.value)
         token = tokens[2]
         self.assertEqual(TokenType.FULL_STOP, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('.', token.value)
         token = tokens[3]
         self.assertEqual(TokenType.IDENTIFIER, token.type)
         self.assertEqual('package', token.value)
         token = tokens[4]
         self.assertEqual(TokenType.REQUIRE, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('require', token.value)
         token = tokens[5]
         self.assertEqual(TokenType.LEFT_SQUARE_BRACKET, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('[', token.value)
         token = tokens[6]
         self.assertEqual(TokenType.IDENTIFIER, token.type)
         self.assertEqual('ABC', token.value)
         token = tokens[7]
         self.assertEqual(TokenType.RIGHT_SQUARE_BRACKET, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual(']', token.value)
         token = tokens[8]
         self.assertEqual(TokenType.EOF, token.type)
         self.assertIsNone(token.value)
@@ -222,7 +232,8 @@ class TestTokenizer(TestCase):
         self.assertEqual(3, len(tokens))
         token = tokens[0]
         self.assertEqual(TokenType.CLASS, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('class', token.value)
         token = tokens[1]
         self.assertEqual(TokenType.IDENTIFIER, token.type)
         self.assertEqual('Test', token.value)
@@ -243,13 +254,15 @@ class TestTokenizer(TestCase):
         self.assertEqual(5, len(tokens))
         token = tokens[0]
         self.assertEqual(TokenType.CLASS, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('class', token.value)
         token = tokens[1]
         self.assertEqual(TokenType.IDENTIFIER, token.type)
         self.assertEqual('Test', token.value)
         token = tokens[2]
         self.assertEqual(TokenType.EXTENDS, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('extends', token.value)
         token = tokens[3]
         self.assertEqual(TokenType.IDENTIFIER, token.type)
         self.assertEqual('Base', token.value)
@@ -270,13 +283,15 @@ class TestTokenizer(TestCase):
         self.assertEqual(5, len(tokens))
         token = tokens[0]
         self.assertEqual(TokenType.CLASS, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('class', token.value)
         token = tokens[1]
         self.assertEqual(TokenType.IDENTIFIER, token.type)
         self.assertEqual('Test', token.value)
         token = tokens[2]
         self.assertEqual(TokenType.IMPLEMENTS, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('implements', token.value)
         token = tokens[3]
         self.assertEqual(TokenType.IDENTIFIER, token.type)
         self.assertEqual('Base', token.value)
@@ -297,19 +312,22 @@ class TestTokenizer(TestCase):
         self.assertEqual(7, len(tokens))
         token = tokens[0]
         self.assertEqual(TokenType.CLASS, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('class', token.value)
         token = tokens[1]
         self.assertEqual(TokenType.IDENTIFIER, token.type)
         self.assertEqual('Test', token.value)
         token = tokens[2]
         self.assertEqual(TokenType.IMPLEMENTS, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('implements', token.value)
         token = tokens[3]
         self.assertEqual(TokenType.IDENTIFIER, token.type)
         self.assertEqual('Base', token.value)
         token = tokens[4]
         self.assertEqual(TokenType.COMMA, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual(',', token.value)
         token = tokens[5]
         self.assertEqual(TokenType.IDENTIFIER, token.type)
         self.assertEqual('Other', token.value)
@@ -330,18 +348,22 @@ class TestTokenizer(TestCase):
         self.assertEqual(5, len(tokens))
         token = tokens[0]
         self.assertEqual(TokenType.CLASS, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('class', token.value)
         token = tokens[1]
         self.assertEqual(TokenType.IDENTIFIER, token.type)
         self.assertEqual('Test', token.value)
         token = tokens[2]
         self.assertEqual(TokenType.LEFT_CURLY_BRACKET, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('{', token.value)
         token = tokens[3]
         self.assertEqual(TokenType.RIGHT_CURLY_BRACKET, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('}', token.value)
         token = tokens[4]
         self.assertEqual(TokenType.EOF, token.type)
+        self.assertIsNone(token.value)
 
     def test_interface_to_tokens(self):
         # given
@@ -356,7 +378,8 @@ class TestTokenizer(TestCase):
         self.assertEqual(3, len(tokens))
         token = tokens[0]
         self.assertEqual(TokenType.INTERFACE, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('interface', token.value)
         token = tokens[1]
         self.assertEqual(TokenType.IDENTIFIER, token.type)
         self.assertEqual('Test', token.value)
@@ -377,13 +400,15 @@ class TestTokenizer(TestCase):
         self.assertEqual(5, len(tokens))
         token = tokens[0]
         self.assertEqual(TokenType.INTERFACE, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('interface', token.value)
         token = tokens[1]
         self.assertEqual(TokenType.IDENTIFIER, token.type)
         self.assertEqual('Test', token.value)
         token = tokens[2]
         self.assertEqual(TokenType.EXTENDS, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('extends', token.value)
         token = tokens[3]
         self.assertEqual(TokenType.IDENTIFIER, token.type)
         self.assertEqual('Base', token.value)
@@ -404,7 +429,8 @@ class TestTokenizer(TestCase):
         self.assertEqual(3, len(tokens))
         token = tokens[0]
         self.assertEqual(TokenType.TYPE, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('type', token.value)
         token = tokens[1]
         self.assertEqual(TokenType.IDENTIFIER, token.type)
         self.assertEqual('Test', token.value)
@@ -425,7 +451,8 @@ class TestTokenizer(TestCase):
         self.assertEqual(3, len(tokens))
         token = tokens[0]
         self.assertEqual(TokenType.ENUMERATION, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('enumeration', token.value)
         token = tokens[1]
         self.assertEqual(TokenType.IDENTIFIER, token.type)
         self.assertEqual('Test', token.value)
@@ -449,10 +476,12 @@ class TestTokenizer(TestCase):
         self.assertEqual('test', token.value)
         token = tokens[1]
         self.assertEqual(TokenType.COLON, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual(':', token.value)
         token = tokens[2]
         self.assertEqual(TokenType.INTEGER_TYPE, token.type)
-        self.assertIsNone(token.value)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('integer', token.value)
         token = tokens[3]
         self.assertEqual(TokenType.EOF, token.type)
         self.assertIsNone(token.value)

@@ -21,7 +21,7 @@ class Error(ABC):
         """
         message = self._message
         message = f'{message} file: {self._filename},'
-        message = f'{message} line: {self._line + 1}, column: {self._column + 1}'
+        message = f'{message} line: {self._line}, column: {self._column}'
         return message
 
 class InvalidComment(Error):

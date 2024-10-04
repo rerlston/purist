@@ -50,6 +50,8 @@ class TokenType(Enum):
     INTERFACE_IDENTIFIER = 'INTERFACE_IDENTIFIER'
     TYPE_IDENTIFIER = 'TYPE_IDENTIFIER'
     ENUMERATION_IDENTIFIER = 'ENUMERATION_IDENTIFIER'
+    CONSTRUCTOR = 'CONSTRUCTOR'
+    DESTRUCTOR = 'DESTRUCTOR'
     VARIABLE = 'VARIABLE'
     CONSTANT = 'CONSTANT'
     NEW = 'NEW'
@@ -139,11 +141,10 @@ class Token():
         return self._column
 
     def __repr__(self) -> str:
-        print(self._type)
         if self._value is not None:
-            return f'({self._type.__repr__()}[{self.line}:{self.column}] = {self._value})'
+            return f'({self._type.__repr__()}[{self._line}:{self._column}] = {self._value})'
         else:
-            return f'({self._type.__repr__()}[{self.line}:{self.column}])'
+            return f'({self._type.__repr__()}[{self._line}:{self._column}])'
 
 class Tokenizer():
     """
@@ -165,67 +166,71 @@ class Tokenizer():
         next_value, error, line, column = lexer.next()
         while next_value is not None and error is None:
             if next_value == 'from':
-                response.append(Token(TokenType.FROM, filepath, line, column))
+                response.append(Token(TokenType.FROM, filepath, line, column, next_value))
             elif next_value == 'Builtin':
-                response.append(Token(TokenType.BUILTIN, filepath, line, column))
+                response.append(Token(TokenType.BUILTIN, filepath, line, column, next_value))
             elif next_value == 'require':
-                response.append(Token(TokenType.REQUIRE, filepath, line, column))
+                response.append(Token(TokenType.REQUIRE, filepath, line, column, next_value))
             elif next_value == 'class':
-                response.append(Token(TokenType.CLASS, filepath, line, column))
+                response.append(Token(TokenType.CLASS, filepath, line, column, next_value))
             elif next_value == 'interface':
-                response.append(Token(TokenType.INTERFACE, filepath, line, column))
+                response.append(Token(TokenType.INTERFACE, filepath, line, column, next_value))
             elif next_value == 'type':
-                response.append(Token(TokenType.TYPE, filepath, line, column))
+                response.append(Token(TokenType.TYPE, filepath, line, column, next_value))
             elif next_value == 'enumeration':
-                response.append(Token(TokenType.ENUMERATION, filepath, line, column))
+                response.append(Token(TokenType.ENUMERATION, filepath, line, column, next_value))
             elif next_value == 'extends':
-                response.append(Token(TokenType.EXTENDS, filepath, line, column))
+                response.append(Token(TokenType.EXTENDS, filepath, line, column, next_value))
             elif next_value == 'implements':
-                response.append(Token(TokenType.IMPLEMENTS, filepath, line, column))
+                response.append(Token(TokenType.IMPLEMENTS, filepath, line, column, next_value))
             elif next_value == 'string':
-                response.append(Token(TokenType.STRING_TYPE, filepath, line, column))
+                response.append(Token(TokenType.STRING_TYPE, filepath, line, column, next_value))
             elif next_value == 'boolean':
-                response.append(Token(TokenType.BOOLEAN_TYPE, filepath, line, column))
+                response.append(Token(TokenType.BOOLEAN_TYPE, filepath, line, column, next_value))
             elif next_value == 'integer':
-                response.append(Token(TokenType.INTEGER_TYPE, filepath, line, column))
+                response.append(Token(TokenType.INTEGER_TYPE, filepath, line, column, next_value))
             elif next_value == 'number':
-                response.append(Token(TokenType.DECIMAL_TYPE, filepath, line, column))
+                response.append(Token(TokenType.DECIMAL_TYPE, filepath, line, column, next_value))
             elif next_value == 'false' or next_value == 'true':
                 response.append(Token(TokenType.BOOLEAN_VALUE, filepath, line, column, next_value))
             elif next_value == 'null':
-                response.append(Token(TokenType.NULL, filepath, line, column))
+                response.append(Token(TokenType.NULL, filepath, line, column, next_value))
             elif next_value.startswith('"'):
                 response.append(Token(TokenType.STRING_VALUE, filepath, line, column, next_value))
             elif next_value == ',':
-                response.append(Token(TokenType.COMMA, filepath, line, column))
+                response.append(Token(TokenType.COMMA, filepath, line, column, next_value))
             elif next_value == '[':
-                response.append(Token(TokenType.LEFT_SQUARE_BRACKET, filepath, line, column))
+                response.append(Token(TokenType.LEFT_SQUARE_BRACKET, filepath, line, column, next_value))
             elif next_value == ']':
-                response.append(Token(TokenType.RIGHT_SQUARE_BRACKET, filepath, line, column))
+                response.append(Token(TokenType.RIGHT_SQUARE_BRACKET, filepath, line, column, next_value))
             elif next_value == '(':
-                response.append(Token(TokenType.LEFT_BRACKET, filepath, line, column))
+                response.append(Token(TokenType.LEFT_BRACKET, filepath, line, column, next_value))
             elif next_value == ')':
-                response.append(Token(TokenType.RIGHT_BRACKET, filepath, line, column))
+                response.append(Token(TokenType.RIGHT_BRACKET, filepath, line, column, next_value))
             elif next_value == '{':
-                response.append(Token(TokenType.LEFT_CURLY_BRACKET, filepath, line, column))
+                response.append(Token(TokenType.LEFT_CURLY_BRACKET, filepath, line, column, next_value))
             elif next_value == '}':
-                response.append(Token(TokenType.RIGHT_CURLY_BRACKET, filepath, line, column))
+                response.append(Token(TokenType.RIGHT_CURLY_BRACKET, filepath, line, column, next_value))
             elif next_value == ':':
-                response.append(Token(TokenType.COLON, filepath, line, column))
+                response.append(Token(TokenType.COLON, filepath, line, column, next_value))
             elif next_value == '=':
-                response.append(Token(TokenType.EQUALS, filepath, line, column))
+                response.append(Token(TokenType.EQUALS, filepath, line, column, next_value))
             elif next_value == '<':
-                response.append(Token(TokenType.LEFT_ANGLE_BRACKET, filepath, line, column))
+                response.append(Token(TokenType.LEFT_ANGLE_BRACKET, filepath, line, column, next_value))
             elif next_value == '>':
-                response.append(Token(TokenType.RIGHT_ANGLE_BRACKET, filepath, line, column))
+                response.append(Token(TokenType.RIGHT_ANGLE_BRACKET, filepath, line, column, next_value))
             elif next_value == '.':
-                response.append(Token(TokenType.FULL_STOP, filepath, line, column))
+                response.append(Token(TokenType.FULL_STOP, filepath, line, column, next_value))
             elif next_value == '!':
-                response.append(Token(TokenType.NOT, filepath, line, column))
+                response.append(Token(TokenType.NOT, filepath, line, column, next_value))
+            elif next_value == 'constructor':
+                response.append(Token(TokenType.CONSTRUCTOR, filepath, line, column, next_value))
+            elif next_value == 'destructor':
+                response.append(Token(TokenType.DESTRUCTOR, filepath, line, column, next_value))
             elif next_value == '|':
-                response.append(Token(TokenType.LOGICAL_OR, filepath, line, column))
+                response.append(Token(TokenType.LOGICAL_OR, filepath, line, column, next_value))
             elif next_value.startswith('//'):
-                response.append(Token(TokenType.COMMENT, filepath, line, column))
+                response.append(Token(TokenType.COMMENT, filepath, line, column, next_value))
             elif self._is_integer(next_value):
                 response.append(
                     Token(TokenType.INTEGER_VALUE, filepath, line, column, int(next_value))

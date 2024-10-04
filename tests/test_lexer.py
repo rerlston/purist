@@ -337,7 +337,7 @@ class TestLexer(TestCase):
         self.assertEqual(lines[4], 2, 'line should be 2')
         self.assertEqual(columns[4], 10, 'column should be 10')
 
-    def test_multiline_code_with_commen(self):
+    def test_multiline_code_with_comment(self):
         # given
         text = 'from b require [B]\n// comment\n\nclass A implements B{\n}'
         service = Lexer('test', text)
@@ -419,3 +419,44 @@ class TestLexer(TestCase):
         self.assertIsNone(errors[10])
         self.assertEqual(lines[10], 4, 'line should be 3')
         self.assertEqual(columns[10], 20, 'column should be 20')
+
+    def test_sample_code(self):
+        # given
+        text = """from Builtin require [Strategy, Stateless, Logger]
+
+from strategies.sampleStrategy require [SampleStrategy]
+from sampleType require [MyCustomType]
+
+class SampleInstanceStrategy extends Strategy implements SampleStrategy, Stateless {
+    logging: Logger
+
+    constructor() {
+        super("a123")
+    }
+
+    process(value: MyCustomType): void {
+        logging.info("you have reached the process method of the ${class.name}: person name: ${value.name}")
+    }
+}
+        """
+        service = Lexer('test', text)
+
+        # when
+        strings: List[str|int|float|None] = []
+        errors: List[Error|None] = []
+        lines: List[int] = []
+        columns: List[int] = []
+        string: str|None = ""
+        count: int = 1
+        for index in range(62):
+            string, error, line, column = service.next()
+            strings.append(string)
+            errors.append(error)
+            lines.append(line)
+            columns.append(column)
+            print(f'{count}: {string} {line} {column}')
+            count = count + 1
+
+        # then
+        # 'from'
+        self.assertEqual(strings[0], 'from')

@@ -61,8 +61,8 @@ class Lexer():
                     error = DecodeError(
                         character,
                         self._filepath,
-                        self._line,
-                        self._column
+                        self._line + 1,
+                        self._column + 1
                     )
             if response is None or error is None:
                 if self._column >= len(self._lines[self._line]):
@@ -89,8 +89,8 @@ class Lexer():
                     return None, DecodeError(
                         'too many decimal points',
                         self._filepath,
-                        self._line,
-                        self._column
+                        self._line + 1,
+                        self._column + 1
                     )
             number += character
             self._column += 1
