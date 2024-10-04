@@ -221,9 +221,16 @@ class Parser():
                 token, index = self._next_token(tokens, index)
         return response, index
 
+    def _skip_comments(self, tokens: List[Token], index: int) -> Tuple[Token, int]:
+        token = tokens[index]
+        while token.type == TokenType.COMMENT:
+            token, index = self._next_token(tokens, index)
+        return token, index
+
     def _parse_class_attributes(self, tokens: List[Token], index: int) -> Tuple[List[Node], int]:
         response: List[Node] = []
         token = tokens[index]
+        token, index = self._skip_comments(tokens, index)
         if token.type != TokenType.IDENTIFIER:
             return response, index
         while token.type == TokenType.IDENTIFIER and tokens[index+1].type == TokenType.COLON:
@@ -263,7 +270,7 @@ class Parser():
         token, index = self._next_token(tokens, index)
         while token.type != TokenType.RIGHT_BRACKET:
             if token.type != TokenType.IDENTIFIER:
-                return response, index
+                return parameters, index
             while token.type == TokenType.IDENTIFIER and tokens[index+1].type == TokenType.COLON:
                 attribute_name = str(token.value)
                 if re.match(VARIABLE_CASE, attribute_name) is None:
@@ -313,7 +320,7 @@ class Parser():
                 constructor = Node('constructor', str(tokens[index].value))
                 constructors.append(constructor)
                 token, index = self._next_token(tokens, index)
-                if self._expected_next_token(tokens, index, TokenType.LEFT_BRACKET):
+                if self._expected_current_token(tokens, index, TokenType.LEFT_BRACKET):
                     parameters, index = self._parse_method_parameters(tokens, index)
                     constructor.add_child(parameters)
                     if self._expected_next_token(tokens, index, TokenType.RIGHT_BRACKET):
@@ -360,7 +367,7 @@ class Parser():
                 token, index = self._next_token(tokens, index)
                 if self._expected_next_token(tokens, index, TokenType.LEFT_BRACKET):
                     parameters, index = self._parse_method_parameters(tokens, index)
-                    me.add_child(parameters)
+                    method.add_child(parameters)
                     if self._expected_next_token(tokens, index, TokenType.RIGHT_BRACKET):
                         token, index = self._next_token(tokens, index)
                         if self._expected_next_token(tokens, index, TokenType.LEFT_CURLY_BRACKET):
@@ -417,6 +424,8 @@ class Parser():
 
     def _next_token(self, tokens: List[Token], index: int) -> Tuple[Token, int]:
         index += 1
+        while index < len(tokens) and tokens[index].type is TokenType.COMMENT:
+            index += 1
         if index >= len(tokens):
             raise ValueError('Unexpected end of file')
         return tokens[index], index
