@@ -145,9 +145,9 @@ class Token():
 
     def __repr__(self) -> str:
         if self._value is not None:
-            return f'({self._type.__repr__()}[{self.line}:{self.column}] = {self._value})'
+            return f'({self._type.__repr__()}[{self._line}:{self._column}] = {self._value})'
         else:
-            return f'({self._type.__repr__()}[{self.line}:{self.column}])'
+            return f'({self._type.__repr__()}[{self._line}:{self._column}])'
 
 class Tokenizer():
     """

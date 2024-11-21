@@ -2,10 +2,12 @@
 Purist Parser, entry point to parse the purist source code
 """
 import json
+import logging
 import re
 import sys
 import time
 
+from os import environ as env
 from os.path import join as path
 from typing import Any, Dict, List, Tuple
 
@@ -120,9 +122,12 @@ class Parser():
             tokens = self._tokenizer.tokenize(file_path, text)
             for token in tokens:
                 logger.debug(token)
-            ast = self._parse_tokens(tokens, file_path)
-            self._parsed_file_nodes[file_path] = ast
-            return ast
+            try:
+                ast = self._parse_tokens(tokens, file_path)
+                self._parsed_file_nodes[file_path] = ast
+                return ast
+            except ValueError as e:
+                self._log_error(f'Compile error: {e}')
         except FileNotFoundError:
             logger.error(f'File not found: {full_path}')
             error = InvalidImportStatement(full_path, 0, 0)
@@ -131,6 +136,8 @@ class Parser():
             logger.error('Recursion error')
             error = InvalidImportStatement(full_path, 0, 0)
             self._log_error(error.get_error())
+        except ValueError as e:
+            self._log_error(str(e))
 
     def _log_error(self, error: str) -> None:
         logger.error(error)
@@ -227,9 +234,16 @@ class Parser():
                 token, index = self._next_token(tokens, index)
         return response, index
 
+    def _skip_comments(self, tokens: List[Token], index: int) -> Tuple[Token, int]:
+        token = tokens[index]
+        while token.type == TokenType.COMMENT:
+            token, index = self._next_token(tokens, index)
+        return token, index
+
     def _parse_class_attributes(self, tokens: List[Token], index: int) -> Tuple[List[Node], int]:
         response: List[Node] = []
         token = tokens[index]
+        token, index = self._skip_comments(tokens, index)
         if token.type != TokenType.IDENTIFIER:
             return response, index
         while token.type == TokenType.IDENTIFIER and tokens[index+1].type == TokenType.COLON:
@@ -264,8 +278,76 @@ class Parser():
             token, index = self._next_token(tokens, index)
         return response, index
 
+    def _parse_method_parameters(self, tokens: List[Token], index: int) -> Tuple[Node, int]:
+        parameters = Node('parameters')
+        token, index = self._next_token(tokens, index)
+        while token.type != TokenType.RIGHT_BRACKET:
+            if token.type != TokenType.IDENTIFIER:
+                return parameters, index
+            while token.type == TokenType.IDENTIFIER and tokens[index+1].type == TokenType.COLON:
+                attribute_name = str(token.value)
+                if re.match(VARIABLE_CASE, attribute_name) is None:
+                    error = InvalidVariableName(
+                        attribute_name,
+                        token.filename,
+                        token.line,
+                        token.column
+                    )
+                    raise ValueError(error.get_error())
+                token, index = self._expected_next_token(tokens, index, TokenType.COLON)
+                attribute_type, index = self._expect_next_one_of_token(
+                    tokens,
+                    index,
+                    [
+                        TokenType.CLASS_IDENTIFIER,
+                        TokenType.INTERFACE_IDENTIFIER,
+                        TokenType.TYPE_IDENTIFIER,
+                        TokenType.ENUMERATION_IDENTIFIER,
+                        TokenType.STRING_TYPE,
+                        TokenType.BOOLEAN_TYPE,
+                        TokenType.DECIMAL_TYPE,
+                        TokenType.INTEGER_TYPE,
+                        TokenType.IDENTIFIER
+                    ])
+                parameter = Node('attribute', attribute_name)
+                parameter_type = Node(str(attribute_type))
+                parameter.add_child(parameter_type)
+                parameters.add_child(parameter)
+                token, index = self._next_token(tokens, index)
+            if token.type == TokenType.COMMA:
+                token, index = self._next_token(tokens, index)
+        return parameters, index + 1
+
+    def _parse_method_body(self, tokens: List[Token], index: int) -> Tuple[Node, int]:
+        body_node = Node('body')
+        token, index = self._next_token(tokens, index)
+        while token.type != TokenType.RIGHT_CURLY_BRACKET:
+            token, index = self._next_token(tokens, index)
+        return body_node, index + 1
+
+    def _parse_class_constructors(self, tokens: List[Token], index: int) -> Tuple[List[Node], int]:
+        constructors: List[Node] = []
+        while self._is_token_one_of(tokens, index, [TokenType.CONSTRUCTOR]):
+            constructor = Node('constructor', str(tokens[index].value))
+            constructors.append(constructor)
+            token, index = self._next_token(tokens, index)
+            if self._expected_current_token(tokens, index, TokenType.LEFT_BRACKET):
+                parameters, index = self._parse_method_parameters(tokens, index)
+                constructor.add_child(parameters)
+                if self._expected_next_token(tokens, index, TokenType.RIGHT_BRACKET):
+                    token, index = self._next_token(tokens, index)
+                    if self._expected_next_token(tokens, index, TokenType.LEFT_CURLY_BRACKET):
+                        body, index = self._parse_method_body(tokens, index)
+                        constructor.add_child(body)
+                        token, index = self._next_token(tokens, index)
+                        if self._expected_next_token(
+                                tokens, index, TokenType.RIGHT_CURLY_BRACKET
+                        ):
+                            token, index = self._next_token(tokens, index)
+        return constructors, index
+
     def _parse_class_methods(self, tokens: List[Token], index: int) -> Tuple[List[Node], int]:
-        response: List[Node] = []
+        methods: List[Node] = []
         while self._is_token_one_of(tokens, index, [
                 TokenType.PUBLIC,
                 TokenType.PRIVATE,
@@ -287,32 +369,57 @@ class Parser():
                         tokens[index].column
                     )
                     self._log_error(error.get_error())
-                method_node = Node('method', str(tokens[index].value))
+                method = Node('method', str(tokens[index].value))
                 if not visibility_node:
-                    method_node.add_child(Node('private'))
+                    method.add_child(Node('private'))
                 else:
-                    method_node.add_child(visibility_node)
-                response.append(method_node)
+                    method.add_child(visibility_node)
+                methods.append(method)
                 token, index = self._next_token(tokens, index)
-        return response, index
+                if self._expected_next_token(tokens, index, TokenType.LEFT_BRACKET):
+                    parameters, index = self._parse_method_parameters(tokens, index)
+                    method.add_child(parameters)
+                    if self._expected_next_token(tokens, index, TokenType.RIGHT_BRACKET):
+                        token, index = self._next_token(tokens, index)
+                        if self._expected_next_token(tokens, index, TokenType.LEFT_CURLY_BRACKET):
+                            body, index = self._parse_method_body(tokens, index)
+                            method.add_child(body)
+                            token, index = self._next_token(tokens, index)
+                            if self._expected_next_token(
+                                    tokens, index, TokenType.RIGHT_CURLY_BRACKET
+                            ):
+                                token, index = self._next_token(tokens, index)
+        return methods, index
 
     def _parse_class(self, tokens: List[Token], index: int) -> Tuple[Node, int]:
         index += 1
+        logging.debug('Parsing class')
+        logging.debug('checking for class identifier')
         class_node, index = self._parse_class_identifier(tokens, index)
+        logging.debug('checking for class extends')
         extends_node, index = self._parse_class_extends(tokens, index)
         if extends_node is not None:
             class_node.add_child(extends_node)
+        logging.debug('checking for class implements')
         implements_nodes, index = self._parse_class_implements(tokens, index)
         if len(implements_nodes) > 0:
             for implements_node in implements_nodes:
                 class_node.add_child(implements_node)
+        logging.debug('checking for class body start "{"')
         token, index = self._expected_current_token(tokens, index, TokenType.LEFT_CURLY_BRACKET)
+        logging.debug('parsing class attributes')
         attributes, index = self._parse_class_attributes(tokens, index)
         for attribute in attributes:
             class_node.add_child(attribute)
+        logging.debug('parsing class constructors')
+        constructors, index = self._parse_class_constructors(tokens, index)
+        for constructor in constructors:
+            class_node.add_child(constructor)
+        logging.debug('parsing class methods')
         methods, index = self._parse_class_methods(tokens, index)
         for method in methods:
             class_node.add_child(method)
+        logging.debug('checking for class body end "}"')
         token, index = self._expected_current_token(tokens, index, TokenType.RIGHT_CURLY_BRACKET)
         return class_node, index
 
@@ -328,6 +435,8 @@ class Parser():
 
     def _next_token(self, tokens: List[Token], index: int) -> Tuple[Token, int]:
         index += 1
+        while index < len(tokens) and tokens[index].type is TokenType.COMMENT:
+            index += 1
         if index >= len(tokens):
             self._log_error('Unexpected end of file')
         return tokens[index], index
@@ -344,8 +453,8 @@ class Parser():
         current_token, index = self._next_token(tokens, index)
         if current_token.type != token_type:
             error = UnexpectedKeyword(
-                str(token_type.name),
-                str(current_token.type.name),
+                str(token_type.value),
+                str(current_token.value),
                 current_token.filename,
                 current_token.line,
                 current_token.column
@@ -369,6 +478,16 @@ class Parser():
                 current_token.column
             )
             self._log_error(error.get_error())
+            if current_token.type is not TokenType.COMMENT:
+                error = UnexpectedKeyword(
+                    str(token_type.name),
+                    str(current_token.value),
+                    current_token.filename,
+                    current_token.line,
+                    current_token.column
+                )
+                raise ValueError(error.get_error())
+            return self._expected_current_token(tokens, index + 1, token_type)
         return current_token, index + 1
 
     def _expect_next_one_of_token(
@@ -387,6 +506,17 @@ class Parser():
                 current_token.column
             )
             self._log_error(error.get_error())
+            if current_token.type is not TokenType.COMMENT:
+                error = UnexpectedKeyword(
+                    ' or '.join([str(t.name) for t in expected_tokens]),
+                    str(current_token.value),
+                    current_token.filename,
+                    current_token.line,
+                    current_token.column
+                )
+                raise ValueError(error.get_error())
+            current_token, index = self._next_token(tokens, index)
+            return self._expect_next_one_of_token(tokens, index, expected_tokens)
         return current_token, index
 
     def _parse_import_statement(self, tokens: List[Token], index: int) -> Tuple[Node | None, int]:
@@ -438,7 +568,9 @@ def main(filename: str) -> None:
     start = time.time()
     ast = parser.parse(filename)
     end = time.time()
-    logger.debug(ast)
+
+    if ast is not None:
+        logger.debug(ast)
     logger.info(f'Parsed in {end - start} seconds')
 
 
@@ -448,4 +580,9 @@ if __name__ == '__main__':
         print('the source code paths is currently relative to the purity-src folder')
         print('example usage: python parser.py entry.purist')
         sys.exit(1)
+    logging.basicConfig(
+        format='%(asctime)s [%(levelname)-8s] [%(pathname)s:%(lineno)d] %(message)s',
+        level=env.get('LOGGING_LEVEL', logging.DEBUG)
+    )
+
     main(sys.argv[1])
