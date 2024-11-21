@@ -21,7 +21,7 @@ class Error(ABC):
         """
         message = self._message
         message = f'{message} file: {self._filename},'
-        message = f'{message} line: {self._line + 1}, column: {self._column + 1}'
+        message = f'{message} line: {self._line}, column: {self._column}'
         return message
 
 class InvalidComment(Error):
@@ -43,7 +43,7 @@ class UnexpectedKeyword(Error):
     Error for unexpected keywords
     """
     def __init__(self, expected: str, found: str, filename: str, line: int, column: int) -> None:
-        message = f'Unexpected keyword: "{found}" expected "{expected}"'
+        message = f'Unexpected keyword or character: "{found}" expected "{expected}"'
         super().__init__(message, filename, line, column)
 
 class InvalidClassName(Error):

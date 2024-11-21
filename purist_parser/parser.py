@@ -4,13 +4,17 @@ Purist Parser, entry point to parse the purist source code
 import json
 import re
 import sys
+import time
 
 from os.path import join as path
-
-import time
 from typing import Any, Dict, List, Tuple
-from errors import InvalidClassName, InvalidImportStatement, InvalidInterfaceName, InvalidMethodName, InvalidVariableName, UnexpectedKeyword
-from tokenizer import Token, TokenType, Tokenizer
+
+from purist_parser.tokenizer import Token, Tokenizer, TokenType
+from utils.errors import (InvalidClassName, InvalidImportStatement, InvalidInterfaceName,
+    InvalidMethodName, InvalidVariableName, UnexpectedKeyword
+)
+from utils.logger import Logger, LogLevel
+
 
 PASCAL_CASE = r'^[A-Z](([a-zA-Z0-9]+[A-Z]?)*)$'
 CLASS_CASE = PASCAL_CASE
@@ -20,6 +24,7 @@ METHOD_CASE = CAMEL_CASE
 VARIABLE_CASE = CAMEL_CASE
 CONSTANT = r'^[A-Z][A-Z0-9_][A-Z]+$'
 
+logger = Logger(log_level=LogLevel.DEBUG)
 
 class Node():
     """
@@ -103,31 +108,33 @@ class Parser():
         """
         if file_path in self._parsed_files:
             if file_path in self._parsed_file_nodes:
-                print(f'parsing {file_path} from cache')
+                logger.debug(f'parsing {file_path} from cache')
                 return self._parsed_file_nodes[file_path]
-            print("cyclic dependency detected")
+            logger.warning("cyclic dependency detected")
             return None
         full_path = path(self._src_folder, file_path)
-        print(f'parsing {full_path}')
+        logger.info(f'parsing {full_path}')
         try:
             self._parsed_files.append(file_path)
             text = self._file_reader.read(full_path)
             tokens = self._tokenizer.tokenize(file_path, text)
-            try:
-                ast = self._parse_tokens(tokens, file_path)
-                self._parsed_file_nodes[file_path] = ast
-                return ast
-            except ValueError as e:
-                print(f'Compile error: {e}')
-                raise ValueError(e)
+            for token in tokens:
+                logger.debug(token)
+            ast = self._parse_tokens(tokens, file_path)
+            self._parsed_file_nodes[file_path] = ast
+            return ast
         except FileNotFoundError:
-            print(f'File not found: {full_path}')
+            logger.error(f'File not found: {full_path}')
             error = InvalidImportStatement(full_path, 0, 0)
-            raise ValueError(error.get_error())
+            self._log_error(error.get_error())
         except RecursionError:
-            print('Recursion error')
+            logger.error('Recursion error')
             error = InvalidImportStatement(full_path, 0, 0)
-            raise ValueError(error.get_error())
+            self._log_error(error.get_error())
+
+    def _log_error(self, error: str) -> None:
+        logger.error(error)
+        exit(3)
 
     def _parse_tokens(self, tokens: List[Token], filename: str) -> Node:
         token_index = 0
@@ -158,7 +165,7 @@ class Parser():
                     current_token.line,
                     current_token.column
                 )
-                raise ValueError(error.get_error())
+                self._log_error(error.get_error())
             return Node('class', class_name), index + 1
         error = UnexpectedKeyword(
             'Identifier',
@@ -167,7 +174,7 @@ class Parser():
             current_token.line,
             current_token.column
         )
-        raise ValueError(error.get_error())
+        logger.error(ValueError(error.get_error()))
 
     def _parse_class_extends(self, tokens: List[Token], index: int) -> Tuple[Node|None, int]:
         token = tokens[index]
@@ -180,7 +187,7 @@ class Parser():
                     token.line,
                     token.column
                 )
-                raise ValueError(error.get_error())
+                self._log_error(error.get_error())
             return Node('extends', str(token.value)), index + 1
         return None, index
 
@@ -216,7 +223,7 @@ class Parser():
                             token.line,
                             token.column
                         )
-                        raise ValueError(error.get_error())
+                        self._log_error(error.get_error())
                 token, index = self._next_token(tokens, index)
         return response, index
 
@@ -234,7 +241,7 @@ class Parser():
                     token.line,
                     token.column
                 )
-                raise ValueError(error.get_error())
+                self._log_error(error.get_error())
             token, index = self._expected_next_token(tokens, index, TokenType.COLON)
             attribute_type, index = self._expect_next_one_of_token(
                 tokens,
@@ -247,7 +254,8 @@ class Parser():
                     TokenType.STRING_TYPE,
                     TokenType.BOOLEAN_TYPE,
                     TokenType.DECIMAL_TYPE,
-                    TokenType.INTEGER_TYPE
+                    TokenType.INTEGER_TYPE,
+                    TokenType.IDENTIFIER
                 ])
             attribute_node = Node('attribute', attribute_name)
             attribute_type_node = Node(str(attribute_type))
@@ -278,7 +286,7 @@ class Parser():
                         tokens[index].line,
                         tokens[index].column
                     )
-                    raise ValueError(error.get_error())
+                    self._log_error(error.get_error())
                 method_node = Node('method', str(tokens[index].value))
                 if not visibility_node:
                     method_node.add_child(Node('private'))
@@ -321,7 +329,7 @@ class Parser():
     def _next_token(self, tokens: List[Token], index: int) -> Tuple[Token, int]:
         index += 1
         if index >= len(tokens):
-            raise ValueError('Unexpected end of file')
+            self._log_error('Unexpected end of file')
         return tokens[index], index
 
     def _current_token(self, tokens: List[Token], index: int) -> Tuple[Token, int]:
@@ -342,7 +350,7 @@ class Parser():
                 current_token.line,
                 current_token.column
             )
-            raise ValueError(error.get_error())
+            self._log_error(error.get_error())
         return current_token, index
 
     def _expected_current_token(
@@ -355,12 +363,12 @@ class Parser():
         if current_token.type != token_type:
             error = UnexpectedKeyword(
                 str(token_type.name),
-                str(current_token.type.name),
+                str(current_token.value),
                 current_token.filename,
                 current_token.line,
                 current_token.column
             )
-            raise ValueError(error.get_error())
+            self._log_error(error.get_error())
         return current_token, index + 1
 
     def _expect_next_one_of_token(
@@ -373,12 +381,12 @@ class Parser():
         if current_token.type not in expected_tokens:
             error = UnexpectedKeyword(
                 ' or '.join([str(t.name) for t in expected_tokens]),
-                str(current_token.type.name),
+                str(current_token.value),
                 current_token.filename,
                 current_token.line,
                 current_token.column
             )
-            raise ValueError(error.get_error())
+            self._log_error(error.get_error())
         return current_token, index
 
     def _parse_import_statement(self, tokens: List[Token], index: int) -> Tuple[Node | None, int]:
@@ -412,14 +420,15 @@ class Parser():
                 token.line,
                 token.column
             )
-            raise ValueError(error.get_error())
+            self._log_error(error.get_error())
         if import_expression == 'BUILTIN':
             return Node('builtin'), index
         else:
             packages = import_expression.split('.')
             file_path = path(*packages)
             file_path += '.purist'
-            return self.parse(file_path), index
+            parser = Parser(self._src_folder, self._file_reader)
+            return parser.parse(file_path), index
 
 def main(filename: str) -> None:
     """
@@ -429,8 +438,8 @@ def main(filename: str) -> None:
     start = time.time()
     ast = parser.parse(filename)
     end = time.time()
-    print(ast)
-    print(f'Parsed in {end - start} seconds')
+    logger.debug(ast)
+    logger.info(f'Parsed in {end - start} seconds')
 
 
 if __name__ == '__main__':

@@ -4,7 +4,7 @@ Purist source code lexer, reads source code and discovers words, numbers, operat
 
 from typing import Tuple
 
-from errors import DecodeError, Error
+from utils.errors import DecodeError, Error
 
 VALID_CHARACTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_1234567890'
 
@@ -61,8 +61,8 @@ class Lexer():
                     error = DecodeError(
                         character,
                         self._filepath,
-                        self._line,
-                        self._column
+                        self._line + 1,
+                        self._column + 1
                     )
             if response is None or error is None:
                 if self._column >= len(self._lines[self._line]):
@@ -89,8 +89,8 @@ class Lexer():
                     return None, DecodeError(
                         'too many decimal points',
                         self._filepath,
-                        self._line,
-                        self._column
+                        self._line + 1,
+                        self._column + 1
                     )
             number += character
             self._column += 1
