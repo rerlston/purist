@@ -2,20 +2,19 @@
 Purist Parser, entry point to parse the purist source code
 """
 import json
-import logging
 import re
-import sys
-import time
 
-from os import environ as env
 from os.path import join as path
 from typing import Any, Dict, List, Tuple
 
-from purist_parser.tokenizer import Token, Tokenizer, TokenType
+from purist_parser.tokenizer import Tokenizer, TokenType, Token
 from utils.errors import (InvalidClassName, InvalidImportStatement, InvalidInterfaceName,
     InvalidMethodName, InvalidVariableName, UnexpectedKeyword
 )
+from utils.filereader import FileReader
 from utils.logger import Logger, LogLevel
+
+logger = Logger(log_level=LogLevel.DEBUG)
 
 
 PASCAL_CASE = r'^[A-Z](([a-zA-Z0-9]+[A-Z]?)*)$'
@@ -25,8 +24,6 @@ CAMEL_CASE = r'^[a-z]|([A-Z0-9])[a-z]*'
 METHOD_CASE = CAMEL_CASE
 VARIABLE_CASE = CAMEL_CASE
 CONSTANT = r'^[A-Z][A-Z0-9_][A-Z]+$'
-
-logger = Logger(log_level=LogLevel.DEBUG)
 
 class Node():
     """
@@ -81,11 +78,6 @@ class Node():
                 children.append(json.loads(child.__repr__()))
             response['children'] = children
         return json.dumps(response, indent=4)
-
-class FileReader:
-    def read(self, filename: str) -> str:
-        with open(filename, 'r') as f:
-            return f.read()
 
 class Parser():
     """
@@ -393,33 +385,33 @@ class Parser():
 
     def _parse_class(self, tokens: List[Token], index: int) -> Tuple[Node, int]:
         index += 1
-        logging.debug('Parsing class')
-        logging.debug('checking for class identifier')
+        logger.debug('Parsing class')
+        logger.debug('checking for class identifier')
         class_node, index = self._parse_class_identifier(tokens, index)
-        logging.debug('checking for class extends')
+        logger.debug('checking for class extends')
         extends_node, index = self._parse_class_extends(tokens, index)
         if extends_node is not None:
             class_node.add_child(extends_node)
-        logging.debug('checking for class implements')
+        logger.debug('checking for class implements')
         implements_nodes, index = self._parse_class_implements(tokens, index)
         if len(implements_nodes) > 0:
             for implements_node in implements_nodes:
                 class_node.add_child(implements_node)
-        logging.debug('checking for class body start "{"')
+        logger.debug('checking for class body start "{"')
         token, index = self._expected_current_token(tokens, index, TokenType.LEFT_CURLY_BRACKET)
-        logging.debug('parsing class attributes')
+        logger.debug('parsing class attributes')
         attributes, index = self._parse_class_attributes(tokens, index)
         for attribute in attributes:
             class_node.add_child(attribute)
-        logging.debug('parsing class constructors')
+        logger.debug('parsing class constructors')
         constructors, index = self._parse_class_constructors(tokens, index)
         for constructor in constructors:
             class_node.add_child(constructor)
-        logging.debug('parsing class methods')
+        logger.debug('parsing class methods')
         methods, index = self._parse_class_methods(tokens, index)
         for method in methods:
             class_node.add_child(method)
-        logging.debug('checking for class body end "}"')
+        logger.debug('checking for class body end "}"')
         token, index = self._expected_current_token(tokens, index, TokenType.RIGHT_CURLY_BRACKET)
         return class_node, index
 
@@ -559,30 +551,3 @@ class Parser():
             file_path += '.purist'
             parser = Parser(self._src_folder, self._file_reader)
             return parser.parse(file_path), index
-
-def main(filename: str) -> None:
-    """
-    Entry point to the parser
-    """
-    parser = Parser('purist-src', FileReader())
-    start = time.time()
-    ast = parser.parse(filename)
-    end = time.time()
-
-    if ast is not None:
-        logger.debug(ast)
-    logger.info(f'Parsed in {end - start} seconds')
-
-
-if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print('Usage: python parser.py <filename>')
-        print('the source code paths is currently relative to the purity-src folder')
-        print('example usage: python parser.py entry.purist')
-        sys.exit(1)
-    logging.basicConfig(
-        format='%(asctime)s [%(levelname)-8s] [%(pathname)s:%(lineno)d] %(message)s',
-        level=env.get('LOGGING_LEVEL', logging.DEBUG)
-    )
-
-    main(sys.argv[1])
