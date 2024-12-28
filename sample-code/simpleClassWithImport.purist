@@ -1,0 +1,9 @@
+from Builtin.datastructures.list require [List]
+
+class SimpleClass {
+  public myMethod() {
+    list = new List()
+    print("list = {list}")
+    print("do nothing")
+  }
+}

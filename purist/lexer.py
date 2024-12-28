@@ -19,7 +19,8 @@ class Lexer():
         self._text = text
         self._line = 0
         self._column = 0
-        self._lines = text.splitlines()
+        lines = text.splitlines()
+        self._lines = [line.strip() for line in lines]
 
     def next(self) -> Tuple[str | None, Error | None, int, int]:
         """
@@ -38,7 +39,7 @@ class Lexer():
             while response is None and error is None and self._column < len(
                 self._lines[self._line]
             ):
-                character: str = self._lines[self._line][self._column]
+                character: str = self._lines[self._line].rstrip()[self._column]
                 while character == ' ' or character == '\t':
                     self._column += 1
                     character = self._lines[self._line][self._column]

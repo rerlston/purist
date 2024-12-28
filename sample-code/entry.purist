@@ -1,4 +1,5 @@
-from Builtin require [EntryPoint, Logger]
+from Builtin.process.entrypoint require [EntryPoint]
+from Builtin.utilities.logger require [Logger]
 
 from business.sampleBusiness require [SampleBusiness]
 

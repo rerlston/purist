@@ -17,77 +17,21 @@ from utils.logger import Logger, LogLevel
 logger = Logger(log_level=LogLevel.DEBUG)
 
 
-PASCAL_CASE = r'^[A-Z](([a-zA-Z0-9]+[A-Z]?)*)$'
+PASCAL_CASE = r'^[A-Z](([a-zA-Z0-9]+)*)$'
 CLASS_CASE = PASCAL_CASE
 INTERFACE_CASE = PASCAL_CASE
-CAMEL_CASE = r'^[a-z]|([A-Z0-9])[a-z]*'
+CAMEL_CASE = r'^[a-z]([a-zA-Z0-9])'
 METHOD_CASE = CAMEL_CASE
 VARIABLE_CASE = CAMEL_CASE
-CONSTANT = r'^[A-Z][A-Z0-9_][A-Z]+$'
-
-class Node():
-    """
-    Abstract Syntax Tree Node
-    """
-
-    def __init__(self, node_name: str, value: str | int | float | None = None) -> None:
-        self._node_name = node_name
-        self._value = value
-        self._children: 'List[Node]|None' = None
-
-    @property
-    def children(self) -> 'List[Node]|None':
-        """
-        Returns the children of the node
-        """
-        return self._children
-
-    def add_child(self, node: 'Node|None') -> None:
-        """
-        Adds a child to the parent (current) node
-        Args:
-            node: the node to add as a child
-        """
-        if node is not None:
-            if self._children is None:
-                self._children = []
-            self._children.append(node)
-
-    @property
-    def value(self) -> str | int | float | None:
-        """
-        Returns the value of the node
-
-        Returns:
-            str|int|float|None: the value of the node
-        """
-        return self._value
-
-    @value.setter
-    def value(self, value: str | int | float) -> None:
-        self._value = value
-
-    def __repr__(self) -> str:
-        response: Dict[str, Any] = {}
-        response['type'] = self._node_name
-        if self._value is not None:
-            response['value'] = self._value
-        if self._children is not None:
-            children: List[Dict[str, Any]] = []
-            for child in self._children:
-                children.append(json.loads(child.__repr__()))
-            response['children'] = children
-        return json.dumps(response, indent=4)
+CONSTANT = r'^[A-Z][A-Z0-9_]*[A-Z0-9]$'
 
 class Parser():
     """
     Purist Parser, once it has tokens it checks if the tokens can form a valid AST
     """
 
-    def __init__(self, src_folder: str, file_reader: FileReader) -> None:
+    def __init__(self) -> None:
         self._tokenizer = Tokenizer()
-        self._src_folder = src_folder
-        self._file_reader = file_reader
         self._parsed_files: List[str] = []
         self._parsed_file_nodes: Dict[str, Node] = {}
 

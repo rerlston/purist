@@ -1,0 +1,20 @@
+class List extends Object {
+  private value: string[]
+
+  public constructor() {
+    this.value = new Array[]
+  }
+
+  public constructor(value: string[]) {
+    this.value = value
+  }
+
+  public toString(): string {
+    response = "["
+    for entry in this.value {
+      response = response.concat(entry).concat(",")
+    }
+    response = response.concat("]")
+    return response
+  }
+}

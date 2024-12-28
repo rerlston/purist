@@ -28,75 +28,80 @@ RED = "\x1b[31m"
 RESET = "\x1b[0m"
 
 class Logger:
-    _log_level: LogLevel
+    __current_log_level = os.environ if 'LOG_LEVEL' in os.environ else LogLevel.DEBUG
 
-    def __init__(
-            self,
-            log_level: LogLevel|None = None
-    ) -> None:
+    @staticmethod
+    def configure(log_level: LogLevel | None = None):
         if log_level is not None:
-            self._log_level = log_level
+            Logger.__current_log_level = log_level
         else:
             if 'LOG_LEVEL' in os.environ:
                 level = os.environ['LOG_LEVEL'].toLowerCase()
-                self._log_level = __log_level_map[level]
+                Logger.__current_log_level = __log_level_map[level]
             else:
-                self._log_level = LogLevel.DEBUG
+                Logger.__current_log_level = LogLevel.DEBUG
 
-    def trace(self, *args) -> None:
-        if self._log_level == LogLevel.DEBUG:
-            message = self.__build_message(args)
-            filename, lineNumber = self.__get_caller()
+    @staticmethod
+    def trace(*args) -> None:
+        if Logger.__current_log_level == LogLevel.TRACE:
+            message = Logger.__build_message(args)
+            filename, lineNumber = Logger.__get_caller()
             if filename and lineNumber:
-                print(self.__build_display(filename, int(lineNumber), message, 'TRACE', MAGENTA))
+                print(Logger.__build_display(filename, int(lineNumber), message, 'TRACE', MAGENTA))
             else:
-                print(self.__build_display('unknown', 0, message, 'TRACE', MAGENTA))
+                print(Logger.__build_display('unknown', 0, message, 'TRACE', MAGENTA))
 
-    def debug(self, *args) -> None:
-        if self._log_level == LogLevel.DEBUG:
-            message = self.__build_message(args)
-            filename, lineNumber = self.__get_caller()
+    @staticmethod
+    def debug(*args) -> None:
+        if Logger.__current_log_level in [LogLevel.DEBUG, LogLevel.TRACE]:
+            message = Logger.__build_message(args)
+            filename, lineNumber = Logger.__get_caller()
             if filename and lineNumber:
-                print(self.__build_display(filename, int(lineNumber), message, 'DEBUG', GREEN))
+                print(Logger.__build_display(filename, int(lineNumber), message, 'DEBUG', GREEN))
             else:
-                print(self.__build_display('unknown', 0, message, 'DEBUG', GREEN))
+                print(Logger.__build_display('unknown', 0, message, 'DEBUG', GREEN))
 
-    def info(self, *args) -> None:
-        if self._log_level == LogLevel.DEBUG or self._log_level == LogLevel.INFO:
-            message = self.__build_message(args)
-            filename, lineNumber = self.__get_caller()
+    @staticmethod
+    def info(*args) -> None:
+        if Logger.__current_log_level in [LogLevel.DEBUG, LogLevel.INFO, LogLevel.TRACE]:
+            message = Logger.__build_message(args)
+            filename, lineNumber = Logger.__get_caller()
             if filename is not None and lineNumber is not None:
-                print(self.__build_display(filename, int(lineNumber), message, 'INFO ', BLUE))
+                print(Logger.__build_display(filename, int(lineNumber), message, 'INFO ', BLUE))
             else:
-                print(self.__build_display('unknown', 0, message, 'INFO ', BLUE))
+                print(Logger.__build_display('unknown', 0, message, 'INFO ', BLUE))
 
-    def warning(self, *args) -> None:
-        if self._log_level == LogLevel.DEBUG or self._log_level == LogLevel.INFO or self._log_level == LogLevel.WARNING:
-            message = self.__build_message(args)
-            filename, lineNumber = self.__get_caller()
+    @staticmethod
+    def warning(*args) -> None:
+        if Logger.__current_log_level in [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARNING, LogLevel.TRACE]:
+            message = Logger.__build_message(args)
+            filename, lineNumber = Logger.__get_caller()
             if filename is not None and lineNumber is not None:
-                print(self.__build_display(filename, int(lineNumber), message, 'WARN', ORANGE))
+                print(Logger.__build_display(filename, int(lineNumber), message, 'WARN ', ORANGE))
             else:
-                print(self.__build_display('unknown', 0, message, 'WARN', ORANGE))
+                print(Logger.__build_display('unknown', 0, message, 'WARN', ORANGE))
 
-    def error(self, *args) -> None:
-        message = self.__build_message(args)
-        filename, lineNumber = self.__get_caller()
-        stack = self.__get_stack()
+    @staticmethod
+    def error(*args) -> None:
+        message = Logger.__build_message(args)
+        filename, lineNumber = Logger.__get_caller()
+        stack = Logger.__get_stack()[2:]
         if filename is not None and lineNumber is not None:
-            print(self.__build_display(filename, int(lineNumber), message, 'ERROR', RED, stack))
+            print(Logger.__build_display(filename, int(lineNumber), message, 'ERROR', RED, stack))
         else:
-            print(self.__build_display('unknown', 0, message, 'ERROR', RED, stack))
-            
-    def error_no_stack(self, *args) -> None:
-        message = self.__build_message(args)
-        filename, lineNumber = self.__get_caller()
-        if filename is not None and lineNumber is not None:
-            print(self.__build_display(filename, int(lineNumber), message, 'ERROR', RED))
-        else:
-            print(self.__build_display('unknown', 0, message, 'ERROR', RED))
+            print(Logger.__build_display('unknown', 0, message, 'ERROR', RED, stack))
 
-    def __build_message(self, *args):
+    @staticmethod
+    def error_no_stack(*args) -> None:
+        message = Logger.__build_message(args)
+        filename, lineNumber = Logger.__get_caller()
+        if filename is not None and lineNumber is not None:
+            print(Logger.__build_display(filename, int(lineNumber), message, 'ERROR', RED))
+        else:
+            print(Logger.__build_display('unknown', 0, message, 'ERROR', RED))
+
+    @staticmethod
+    def __build_message(*args):
         response = ''
         items = []
         for arg in args:
@@ -108,32 +113,36 @@ class Logger:
         response = " ".join(items)
         return response
 
-    def __space_pad(self, value: str, length: int) -> str:
+    @staticmethod
+    def __space_pad(value: str, length: int) -> str:
         response = value
         while len(response) < length:
             response += ' '
         return response
 
-    def __zero_pad(self, value: int, length: int) -> str:
+    @staticmethod
+    def __zero_pad(value: int, length: int) -> str:
         response = str(value)
         while len(response) < length:
             response = '0' + response
         return response
 
-    def __zero_pad_right(self, value: int, length: int) -> str:
+    @staticmethod
+    def __zero_pad_right(value: int, length: int) -> str:
         response = str(value)
         while len(response) < length:
             response = response + '0'
         return response
 
-    def __format_date_time(self, date_time: datetime, date_format: str|None = None) -> str:
+    @staticmethod
+    def __format_date_time(date_time: datetime, date_format: str|None = None) -> str:
         year = date_time.year
-        month = self.__zero_pad(date_time.month, 2)
-        day = self.__zero_pad(date_time.day, 2)
-        hour = self.__zero_pad(date_time.hour, 2)
-        minute = self.__zero_pad(date_time.minute, 2)
-        seconds = self.__zero_pad(date_time.second, 2)
-        milliseconds = self.__zero_pad_right(str(date_time.microsecond), 6).replace(r"/ /g", "0")
+        month = Logger.__zero_pad(date_time.month, 2)
+        day = Logger.__zero_pad(date_time.day, 2)
+        hour = Logger.__zero_pad(date_time.hour, 2)
+        minute = Logger.__zero_pad(date_time.minute, 2)
+        seconds = Logger.__zero_pad(date_time.second, 2)
+        milliseconds = Logger.__zero_pad_right(str(date_time.microsecond), 6).replace(r"/ /g", "0")
 
         if date_format is None:
             return f'{year}-{month}-{day} {hour}:{minute}:{seconds}.{milliseconds}'
@@ -148,8 +157,8 @@ class Logger:
 
         return response
 
+    @staticmethod
     def __build_standard_display(
-            self,
             filename: str,
             line_number: int,
             date_time: str,
@@ -157,7 +166,7 @@ class Logger:
             log_level: str,
             colour: str,
             stack: list[dict[str, str]]|None = None) -> str:
-        log_level_resized = self.__space_pad(log_level, 5)
+        log_level_resized = Logger.__space_pad(log_level, 5)
         if stack:
             stack_display = ''
             for entry in stack:
@@ -166,30 +175,32 @@ class Logger:
         else:
             return f'[{colour}{log_level_resized}{RESET}][{date_time}][{filename}:{line_number}] {colour}{message}{RESET}'
 
+    @staticmethod
     def __build_display(
-            self,
             filename: str,
             line_number: int,
             message: str,
             log_level: str,
             colour: str,
             stack: list[dict[str, str]]|None = None) -> str:
-        date_time = self.__format_date_time(datetime.now())
-        return self.__build_standard_display(
+        date_time = Logger.__format_date_time(datetime.now())
+        return Logger.__build_standard_display(
             filename, line_number, date_time, message,
             log_level, colour, stack
         )
 
-    def __get_caller(self) -> tuple[str, str]:
-        stack = self.__get_stack()
-        caller_info = stack[0]
-        path = self.__find_match(caller_info['filename'], os.getcwd())
+    @staticmethod
+    def __get_caller() -> tuple[str, str]:
+        stack = Logger.__get_stack()
+        caller_info = stack[3]
+        path = Logger.__find_match(caller_info['filename'], os.getcwd())
         filename = caller_info['filename']
         filename = filename[len(path) + 1:]
         line_number = caller_info['lineNumber']
         return filename, line_number
 
-    def __find_match(self, filepath: str, current_path: str) -> str:
+    @staticmethod
+    def __find_match(filepath: str, current_path: str) -> str:
         i = 0
         char_left = filepath[i]
         char_right = current_path[i]
@@ -200,7 +211,8 @@ class Logger:
                 char_right = current_path[i]
         return current_path[0: i]
 
-    def __get_stack(self) -> list[dict[str, str]]:
+    @staticmethod
+    def __get_stack() -> list[dict[str, str]]:
         stack_list = []
         frame_info = inspect.stack()
         for frame in frame_info:

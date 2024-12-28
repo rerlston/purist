@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from purist_parser.tokenizer import TokenType, Tokenizer
+from purist.tokenizer import TokenType, Tokenizer
 
 
 class TestTokenizer(TestCase):

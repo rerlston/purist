@@ -1,7 +1,7 @@
 from typing import List
 from unittest import TestCase
 
-from purist_parser.lexer import Lexer
+from purist.lexer import Lexer
 from utils.errors import Error
 
 class TestLexer(TestCase):

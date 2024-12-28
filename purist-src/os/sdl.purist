@@ -1,0 +1,7 @@
+from library:/usr/lib/x86_64-linux-gnu require [libSDL2]
+
+class SDL {
+    public createWindow(title: string, left: integer, top: integer, width: integer, height: integer, mode: integer): integer {
+        return libSDL2.SDL_CreateWindow(title, left, top, width, height, mode)
+    }
+}

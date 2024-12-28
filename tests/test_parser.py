@@ -1,6 +1,6 @@
 from unittest import TestCase, mock
 
-from purist_parser.parser import Parser
+from purist.compiler import Compiler
 
 
 class TestParser(TestCase):
@@ -10,11 +10,11 @@ class TestParser(TestCase):
 
         file_reader = mock.MagicMock()
         file_reader.read.return_value = code
-        service = Parser('test', file_reader)
+        service = Compiler(file_reader)
 
         # when
         try:
-            ast = service.parse('test1.purist')
+            ast = service.compile('test', 'test1.purist')
         except Exception as e:
             self.fail(e)
 
@@ -32,11 +32,11 @@ class TestParser(TestCase):
 
         file_reader = mock.MagicMock()
         file_reader.read.return_value = code
-        service = Parser('test', file_reader)
+        service = Compiler(file_reader)
 
         # when
         try:
-            ast = service.parse('test2.purist')
+            ast = service.compile('test', 'test2.purist')
         except Exception as e:
             self.fail(e)
 

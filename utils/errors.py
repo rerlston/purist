@@ -9,7 +9,7 @@ class Error(ABC):
     """
     Base error for all errors in the purist parser
     """
-    def __init__(self, message: str, filename: str, line: int, column: int) -> None:
+    def __init__(self, message: str, filename: str, line: int|None = None, column: int|None = None) -> None:
         self._message = message
         self._filename = filename
         self._line = line
@@ -21,7 +21,8 @@ class Error(ABC):
         """
         message = self._message
         message = f'{message} file: {self._filename},'
-        message = f'{message} line: {self._line}, column: {self._column}'
+        if self._line is not None and self._column is not None:
+            message = f'{message} line: {self._line}, column: {self._column}'
         return message
 
 class InvalidComment(Error):
@@ -84,4 +85,19 @@ class InvalidMethodName(Error):
     """
     def __init__(self, name: str, filename: str, line: int, column: int) -> None:
         message = f'Invalid method name: "{name}"'
+        super().__init__(message, filename, line, column)
+
+class NoSuchFileError(Error):
+    """
+    Error for specifying a file to parse that does not exist
+    """
+    def __init__(self, filename: str, line: int, column: int) -> None:
+        message = 'Source file not found'
+        super().__init__(message, filename, None, None)
+
+class InvalidSyntaxError(Error):
+    """
+    Error for syntax errors
+    """
+    def __init__(self, message: str, filename: str, line: int, column: int) -> None:
         super().__init__(message, filename, line, column)

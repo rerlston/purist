@@ -1,4 +1,5 @@
-from Builtin require [Strategy, Stateless, Logger]
+from Builtin.utilities.logger require [Logger]
+from Builtin.state require [Stateless]
 
 from strategies.sampleStrategy require [SampleStrategy]
 from sampleType require [MyCustomType]
