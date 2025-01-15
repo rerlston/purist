@@ -137,7 +137,7 @@ class Token():
 
     def __repr__(self) -> str:
         if self._value is not None:
-            if self._type == TokenType.IDENTIFIER:
+            if self._type == TokenType.IDENTIFIER or self._type == TokenType.STRING_VALUE or self._type == TokenType.INTEGER_VALUE or self._type == TokenType.DECIMAL_VALUE:
                 return f'({self._type.__repr__()}[{self._line}:{self._column}] = \'{self._value}\')\n'
             return f'({self._type.__repr__()}[{self._line}:{self._column}])\n'
         else:
