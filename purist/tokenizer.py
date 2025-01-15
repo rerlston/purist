@@ -7,6 +7,8 @@ from typing import List
 from purist.lexer import Lexer
 from purist.models.token import Token, TokenType
 
+from utils.logger import Logger
+
 class Tokenizer():
     """
     Purist Tokenizer, converts discovered source code values into tokens
@@ -22,6 +24,7 @@ class Tokenizer():
         Returns:
             List[Token]: The list of tokens
         """
+        Logger.info(filepath)
         response: List[Token] = []
         lexer: Lexer = Lexer(filepath, text)
         next_value, error, line, column = lexer.next()
@@ -92,6 +95,8 @@ class Tokenizer():
                 response.append(Token(TokenType.CONSTRUCTOR, filepath, line, column, next_value))
             elif next_value == 'destructor':
                 response.append(Token(TokenType.DESTRUCTOR, filepath, line, column, next_value))
+            elif next_value == 'void':
+                response.append(Token(TokenType.VOID, filepath, line, column, next_value))
             elif next_value == '|':
                 response.append(Token(TokenType.LOGICAL_OR, filepath, line, column, next_value))
             elif next_value.startswith('//'):
@@ -104,6 +109,8 @@ class Tokenizer():
                 response.append(
                     Token(TokenType.DECIMAL_VALUE, filepath, line, column, float(next_value))
                 )
+            elif next_value.startswith("https://") or next_value.startswith("git@"):
+                response.append(Token(TokenType.URL, filepath, line, column, next_value))
             else:
                 response.append(Token(TokenType.IDENTIFIER, filepath, line, column, next_value))
             next_value, error, line, column = lexer.next()

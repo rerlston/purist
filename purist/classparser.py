@@ -21,33 +21,33 @@ class ClassParser(Parser):
             source_path: str|None = None
         ) -> Tuple[Node, int]:
         index += 1
-        Logger.debug('Parsing class')
-        Logger.debug('checking for class identifier')
+        Logger.trace('Parsing class')
+        Logger.trace('checking for class identifier')
         class_node, index = self._parse_class_identifier(tokens, index)
-        Logger.debug('checking for class extends')
+        Logger.trace('checking for class extends')
         extends_node, index = self._parse_class_extends(tokens, index)
         if extends_node is not None:
             class_node.add_child(extends_node)
-        Logger.debug('checking for class implements')
+        Logger.trace('checking for class implements')
         implements_nodes, index = self._parse_class_implements(tokens, index)
         if len(implements_nodes) > 0:
             for implements_node in implements_nodes:
                 class_node.add_child(implements_node)
-        Logger.debug('checking for class body start "{"')
+        Logger.trace('checking for class body start "{"')
         token, index = self._expected_current_token(tokens, index, TokenType.LEFT_CURLY_BRACKET)
-        Logger.debug('parsing class attributes')
+        Logger.trace('parsing class attributes')
         attributes, index = self._parse_class_attributes(tokens, index)
         for attribute in attributes:
             class_node.add_child(attribute)
-        Logger.debug('parsing class constructor')
+        Logger.trace('parsing class constructor')
         constructors, index = self._parse_class_constructors(tokens, index)
         for constructor in constructors:
             class_node.add_child(constructor)
-        Logger.debug('parsing class methods')
+        Logger.trace('parsing class methods')
         methods, index = self._parse_class_methods(tokens, index)
         for method in methods:
             class_node.add_child(method)
-        Logger.debug('checking for class body end "}"')
+        Logger.trace('checking for class body end "}"')
         token, index = self._expected_current_token(tokens, index, TokenType.RIGHT_CURLY_BRACKET)
         return class_node, index
 

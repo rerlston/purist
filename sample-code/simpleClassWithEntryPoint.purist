@@ -1,0 +1,8 @@
+from Builtin.datastructures.list require [List]
+from Builtin.process.entrypoint require [EntryPoint]
+
+class SimpleClass implements EntryPoint {
+	public run(List<string> args) void {
+		print("do nothing")
+	}
+}

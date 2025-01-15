@@ -1,0 +1,10 @@
+class SimpleClass {
+	string myAttribute
+	integer MY_CONSTANT = 1
+
+	public myMethod() void {
+		print("hello world")
+		print("my Attribute: {this.myAttribute}")
+		print("my constant: {this.MY_CONSTANT}")
+	}
+}

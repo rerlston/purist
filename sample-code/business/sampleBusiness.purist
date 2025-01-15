@@ -9,23 +9,23 @@ from sampleEnum require [MyCustomEnum]
 // which means a single instance exists but with a shared state
 // changing the state's values will affect the other classes with the same dependency
 class SampleBusiness implements Stateless {
-    logging: Logger      // auto injected
-    myType: MyCustomType // not auto injected
+	Logger logging
+	MyCustomType myType
 
-    public process(variable: String): int {
-        logging.info("SampleBusiness.process called")
+	public process(string variable) integer {
+		logging.info("SampleBusiness.process called")
 
-        myType = new MyCustomType(
-                name="Firstname",
-                surname="Family-Name",
-                dateOfBirth="2020/01/01 00:00:00"
-        )
+		this.myType = new MyCustomType(
+			name="Firstname",
+			surname="Family-Name",
+			dateOfBirth="2020/01/01 00:00:00"
+		)
 
-        myStrategy: SampleStrategy = new Strategy(variable)
-        if myStrategy != null {
-            myStrategy.process(myType)
-        }
+		SampleStrategy myStrategy = new Strategy(variable)
+		if myStrategy != null {
+			myStrategy.process(myType)
+		}
 
-        return 0
-    }
+		return 0
+	}
 }

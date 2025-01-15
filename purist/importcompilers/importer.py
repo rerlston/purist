@@ -61,13 +61,13 @@ class Importer(ABC):
             path += str(token.value)
             token, index = self._next_token(tokens, index)
         index += 1
-        Logger.info(path)
+        Logger.debug(path)
         node = import_compiler.compile(path, token.filename, token.line)
         Logger.debug(node)
         return node, index
 
     def _parse_class(self, tokens: List[Token], index: int) -> Tuple[Node, int]:
-        Logger.debug('parsing class tokens')
+        Logger.trace('parsing class tokens')
         class_parser: ClassParser = ClassParser()
         response = class_parser.parse(tokens, index)
         Logger.debug(response)

@@ -1,0 +1,15 @@
+// unsigned whole numbers
+// ----------------------
+// bit/boolean is 1 bits
+// crumb is 2 bits
+// nibble is 4 bits
+// byte is 8 bits
+
+// signed whole numbers
+// --------------------
+// word is 16 bits (unsigned)
+// short is 16 bits (signed)
+// integer is 64 (signed)
+// long is 64 bits (unsigned)
+
+// should there rather be U1, U2, U4, U8, U16, U32, U64, S16, S23, S64 instead of bit, crumb, nibble, byte, word, short, integer and long?

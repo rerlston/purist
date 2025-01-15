@@ -1,0 +1,5 @@
+from Builtin.datastructures.list require [List]
+
+interface EntryPoint {
+	run(List<string> args) void
+}

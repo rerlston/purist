@@ -1,5 +1,40 @@
-class Logger {
-  public error(message: String) {
-    print(message)
-  }
+class Logger implements Stateless {
+	LogLevel logLevel
+	string format
+
+	public trace(string message) {
+		if this.logLevel == LogLevel.TRACE {
+			print(message)
+		}
+	}
+
+	public debug(string message) {
+		if this.logLevel in (LogLevel.TRACE, LogLevel.DEBUG) {
+			print(message)
+		}
+	}
+
+	public info(string message) {
+		if this.logLevel in (LogLevel.TRACE, LogLevel.DEBUG, LegLevel.INFO) {
+			print(message)
+		}
+	}
+
+	public warning(string message) {
+		if this.logLevel in (LogLevel.TRACE, LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARNING) {
+			print(message)
+		}
+	}
+
+	public error(string message) {
+		print(message)
+	}
+}
+
+enumeration LogLevel {
+	TRACE,
+	DEBUG,
+	INFO,
+	WARNING,
+	ERROR
 }

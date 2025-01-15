@@ -463,26 +463,22 @@ class TestTokenizer(TestCase):
     def test_integer_variable_to_tokens(self):
         # given
         tokenizer = Tokenizer()
-        code = 'test:integer'
+        code = 'integer test'
 
         # when
         tokens = tokenizer.tokenize('unittest', code)
 
         # then
         self.assertIsNotNone(tokens)
-        self.assertEqual(4, len(tokens))
+        self.assertEqual(3, len(tokens))
         token = tokens[0]
-        self.assertEqual(TokenType.IDENTIFIER, token.type)
-        self.assertEqual('test', token.value)
-        token = tokens[1]
-        self.assertEqual(TokenType.COLON, token.type)
-        self.assertIsNotNone(token.value)
-        self.assertEqual(':', token.value)
-        token = tokens[2]
         self.assertEqual(TokenType.INTEGER_TYPE, token.type)
-        self.assertIsNotNone(token.value)
         self.assertEqual('integer', token.value)
-        token = tokens[3]
+        token = tokens[1]
+        self.assertEqual(TokenType.IDENTIFIER, token.type)
+        self.assertIsNotNone(token.value)
+        self.assertEqual('test', token.value)
+        token = tokens[2]
         self.assertEqual(TokenType.EOF, token.type)
         self.assertIsNone(token.value)
 

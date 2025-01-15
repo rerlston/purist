@@ -63,6 +63,8 @@ class TokenType(Enum):
     NULL = 'NULL'
     LOGICAL_OR = 'LOGICAL_OR'
     COMMENT = 'COMMENT'
+    URL = 'URL'
+    VOID = 'VOID'
     EOF = "EOF"
 
 class Token():

@@ -6,7 +6,8 @@ from utils.logger import Logger
 class ImportCompilerFactory:
     __import_managers: Dict[TokenType, str] = {
         TokenType.BUILTIN: "purist.importcompilers.builtincompiler.BuiltInImportCompiler",
-        TokenType.IDENTIFIER: "purist.importcompilers.packagecompiler.PackageImportCompiler"
+        TokenType.IDENTIFIER: "purist.importcompilers.packagecompiler.PackageImportCompiler",
+        TokenType.URL: "purist.importcompilers.gitcompiler.GitImportCompiler"
     }
     __defined_managers: Dict[TokenType, object] = {}
 

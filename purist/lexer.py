@@ -5,9 +5,10 @@ Purist source code lexer, reads source code and discovers words, numbers, operat
 from typing import Tuple
 
 from utils.errors import DecodeError, Error
+from utils.logger import Logger
 
 VALID_CHARACTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_1234567890'
-
+VALID_URL_CHARACTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-./_@:[]'
 
 class Lexer():
     """
@@ -52,6 +53,8 @@ class Lexer():
                     response, error = self._fetch_string()
                 elif character == '/':
                     response, error = self._fetch_comment_or_divide()
+                elif character == '@':
+                    response, error = self._fetch_url()
                 elif character in [
                     '[', ']', '{', '}', '(', ')', ',',
                     ':', '=', '<', '>', '.', '!', '|'
@@ -69,16 +72,21 @@ class Lexer():
                 if self._column >= len(self._lines[self._line]):
                     self._line += 1
                     self._column = 0
+        Logger.trace('next', response, error, start_line + 1, start_column + 1)
         return response, error, start_line + 1, start_column + 1
 
     def _fetch_word(self) -> Tuple[str | None, Error | None]:
         word = ''
         character = self._lines[self._line][self._column]
+        column = self._column
         while character in VALID_CHARACTERS and self._column < len(self._lines[self._line]):
             word += character
             self._column += 1
             if self._column < len(self._lines[self._line]):
                 character = self._lines[self._line][self._column]
+        if character == ':' or character == '@':
+            self._column = column
+            return self._fetch_url()
         return word, None
 
     def _fetch_number(self) -> Tuple[str | None, Error | None]:
@@ -128,3 +136,13 @@ class Lexer():
             self._column += 1
             return '/', None
         return None, DecodeError(first_character, self._filepath, self._line, self._column)
+
+    def _fetch_url(self) -> Tuple[str | None, Error | None]:
+        url = ''
+        character = self._lines[self._line][self._column]
+        while character in VALID_URL_CHARACTERS and self._column < len(self._lines[self._line]):
+            url += character
+            self._column += 1
+            if self._column < len(self._lines[self._line]):
+                character = self._lines[self._line][self._column]
+        return url, None

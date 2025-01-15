@@ -1,14 +1,14 @@
-class String extends Object {
-  private value: string = null
+class String {
+	string value = null
 
-  public constructor(value: string) {
-    this.value = value
-  }
+	public constructor(string value) {
+		this.value = value
+	}
 
-  public toString(): string {
-    if this.value {
-      return value
-    }
-    return new Null().toString()
-  }
+	public toString() string {
+		if this.value {
+			return value
+		}
+		return new Null().toString()
+	}
 }

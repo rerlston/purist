@@ -38,7 +38,7 @@ class PackageImportCompiler(Importer, Parser):
         reader = FileReader()
         file_path = source_path
         if not file_path.endswith(".purist"):
-            Logger.debug(f"base path: [{self.__base_path}]")
+            Logger.trace(f"base path: [{self.__base_path}]")
             path_parts = file_path.split(".")
             file_path = os.path.join(self.__base_path, *path_parts)
             file_path += ".purist"

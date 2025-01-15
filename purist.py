@@ -5,7 +5,7 @@ from purist.importcompilers.importcompilerfactory import ImportCompilerFactory
 from purist.models.token import Token, TokenType
 from utils.logger import Logger, LogLevel
 
-Logger.configure(LogLevel.INFO)
+Logger.configure(LogLevel.DEBUG)
 
 def main(filename: str) -> None:
     """
@@ -18,8 +18,8 @@ def main(filename: str) -> None:
         ast = compiler.compile(filename)
         end = time.time()
 
-        if ast is not None:
-            Logger.debug(ast)
+        # if ast is not None:
+        Logger.info(ast)
         Logger.info(f'Parsed in {end - start} seconds')
     except ValueError as error:
         print(error)

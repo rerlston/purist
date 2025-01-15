@@ -1,9 +1,13 @@
-from Builtin.datastructures.list require [List]
+from Builtin.utilities.logger require [Logger]
 
 class SimpleClass {
-  public myMethod() {
-    list = new List()
-    print("list = {list}")
-    print("do nothing")
-  }
+	Logger logger
+
+	constructor() {
+		this.logger = new Logger()
+	}
+
+	public myMethod() void {
+		this.logger.info("do nothing")
+	}
 }
