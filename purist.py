@@ -1,3 +1,4 @@
+import os
 import sys
 import time
 
@@ -5,7 +6,7 @@ from purist.importcompilers.importcompilerfactory import ImportCompilerFactory
 from purist.models.token import Token, TokenType
 from utils.logger import Logger, LogLevel
 
-Logger.configure(LogLevel.DEBUG)
+Logger.configure()
 
 def main(filename: str) -> None:
     """
@@ -20,16 +21,15 @@ def main(filename: str) -> None:
 
         # if ast is not None:
         Logger.info(ast)
-        Logger.info(f'Parsed in {end - start} seconds')
+        print(f'Parsed in {end - start} seconds')
     except ValueError as error:
         print(error)
         sys.exit(3)
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print('Usage: python parser.py <filename>')
-        print('the source code paths is currently relative to the purity-src folder')
-        print('example usage: python parser.py entry.purist')
+        print('Usage: python purist.py <filename>')
+        print('example usage: python purist.py sample-code/entry.purist')
         sys.exit(1)
 
     main(sys.argv[1])

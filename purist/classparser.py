@@ -24,6 +24,8 @@ class ClassParser(Parser):
         Logger.trace('Parsing class')
         Logger.trace('checking for class identifier')
         class_node, index = self._parse_class_identifier(tokens, index)
+        Logger.trace('Checking for generics')
+        class_generic, index = self._parse_class_generic(tokens, index)
         Logger.trace('checking for class extends')
         extends_node, index = self._parse_class_extends(tokens, index)
         if extends_node is not None:
@@ -72,6 +74,16 @@ class ClassParser(Parser):
             current_token.column
         )
         Logger.error(ValueError(error.get_error()))
+
+    def _parse_class_generic(self, tokens: List[Token], index: int) -> Tuple[Node|None, int]:
+        current_token = tokens[index]
+        generic_name = None
+        if current_token.type == TokenType.LEFT_ANGLE_BRACKET:
+            current_token, index = self._expect_next_one_of_token(tokens, index, [TokenType.IDENTIFIER])
+            generic_name = current_token.value
+            current_token, index = self._expect_next_one_of_token(tokens, index, [TokenType.RIGHT_ANGLE_BRACKET])
+            return Node('class generic', str(generic_name)), index + 1
+        return None, index
 
     def _parse_class_extends(self, tokens: List[Token], index: int) -> Tuple[Node|None, int]:
         token = tokens[index]

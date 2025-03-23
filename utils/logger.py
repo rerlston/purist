@@ -12,13 +12,18 @@ class LogLevel(Enum):
     WARNING = 3
     ERROR = 4
 
-__log_level_map = {
-    'trace': LogLevel.TRACE,
-    'debug': LogLevel.DEBUG,
-    'info': LogLevel.INFO,
-    'warn': LogLevel.WARNING,
-    'error': LogLevel.ERROR
-}
+def _log_level_map(log_level: str) -> LogLevel:
+    levels = {
+        'trace': LogLevel.TRACE,
+        'debug': LogLevel.DEBUG,
+        'info': LogLevel.INFO,
+        'warn': LogLevel.WARNING,
+        'warning': LogLevel.WARNING,
+        'error': LogLevel.ERROR
+    }
+    if log_level in levels:
+        return levels[log_level]
+    return LogLevel.INFO
 
 GREEN = "\x1b[32m"
 BLUE = "\x1b[34m"
@@ -28,7 +33,7 @@ RED = "\x1b[31m"
 RESET = "\x1b[0m"
 
 class Logger:
-    __current_log_level = os.environ if 'LOG_LEVEL' in os.environ else LogLevel.DEBUG
+    __current_log_level = LogLevel.INFO
 
     @staticmethod
     def configure(log_level: LogLevel | None = None):
@@ -36,10 +41,8 @@ class Logger:
             Logger.__current_log_level = log_level
         else:
             if 'LOG_LEVEL' in os.environ:
-                level = os.environ['LOG_LEVEL'].toLowerCase()
-                Logger.__current_log_level = __log_level_map[level]
-            else:
-                Logger.__current_log_level = LogLevel.DEBUG
+                level = os.environ['LOG_LEVEL'].lower()
+                Logger.__current_log_level = _log_level_map(level)
 
     @staticmethod
     def trace(*args) -> None:
