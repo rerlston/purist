@@ -73,7 +73,7 @@ class ClassParser(Parser):
             current_token.line,
             current_token.column
         )
-        Logger.error(ValueError(error.get_error()))
+        raise ValueError(error.get_error())
 
     def _parse_class_generic(self, tokens: List[Token], index: int) -> Tuple[Node|None, int]:
         current_token = tokens[index]

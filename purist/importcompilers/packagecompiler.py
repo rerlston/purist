@@ -49,7 +49,8 @@ class PackageImportCompiler(Importer, Parser):
         content = reader.read(file_path)
         tokens = self._tokenizer.tokenize(source_path, content)
 
-        return self.parse(tokens, 0, source_path)
+        node, index = self.parse(tokens, 0, source_path)
+        return node
 
     def parse(
             self,
@@ -57,4 +58,4 @@ class PackageImportCompiler(Importer, Parser):
             index: int,
             source_path: str|None = None
     ) -> Tuple[Node, int]:
-        self._parse_tokens(tokens, source_path)
+        return self._parse_tokens(tokens, source_path), 0
