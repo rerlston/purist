@@ -1,6 +1,15 @@
 class SimpleClass {
 	string myAttribute
 	integer MY_CONSTANT = 1
+    // integer MY_OTHER_CONSTANT
+
+	constructor(integer param1) {
+		this.myAttribute = "initial value"
+	}
+
+	constructor(string param1) {
+		// do nothing
+	}
 
 	public myMethod() void {
 		print("hello world")

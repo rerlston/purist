@@ -20,7 +20,7 @@ class Error(ABC):
         Returns the error message in a preset layout for error reporting
         """
         message = self._message
-        message = f'{message} file: {self._filename},'
+        message = f'{message}\r\nfile: {self._filename},'
         if self._line is not None and self._column is not None:
             message = f'{message} line: {self._line}, column: {self._column}'
         return message
@@ -100,4 +100,12 @@ class InvalidSyntaxError(Error):
     Error for syntax errors
     """
     def __init__(self, message: str, filename: str, line: int, column: int) -> None:
+        super().__init__(message, filename, line, column)
+
+class ConstantNotInitialised(Error):
+    """
+    Error for constants that do not have an initial value
+    """
+    def __init__(self, attribute_name: str, filename: str, line: int, column: int):
+        message = f'Constant [{attribute_name}] not initialised'
         super().__init__(message, filename, line, column)

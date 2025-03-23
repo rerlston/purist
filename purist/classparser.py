@@ -6,12 +6,13 @@ from purist.models.node import Node
 from purist.models.token import Token, TokenType
 from purist.parser import Parser
 from utils.errors import (UnexpectedKeyword, InvalidClassName,
-    InvalidInterfaceName, InvalidVariableName)
+    InvalidInterfaceName, InvalidVariableName, ConstantNotInitialised)
 from utils.logger import Logger
 
 CLASS_CASE = r'^[A-Z](([a-zA-Z0-9]+)*)$'
 INTERFACE_CASE = CLASS_CASE
 VARIABLE_CASE = r'^[a-z]([a-zA-Z0-9])*'
+CONSTANT_CASE = r'^[A-Z]([A-Z_0-9])*'
 
 class ClassParser(Parser):
     def parse(
@@ -41,7 +42,7 @@ class ClassParser(Parser):
         attributes, index = self._parse_class_attributes(tokens, index)
         for attribute in attributes:
             class_node.add_child(attribute)
-        Logger.trace('parsing class constructor')
+        Logger.trace('parsing class constructors')
         constructors, index = self._parse_class_constructors(tokens, index)
         for constructor in constructors:
             class_node.add_child(constructor)
@@ -129,20 +130,7 @@ class ClassParser(Parser):
         response: List[Node] = []
         token = tokens[index]
         token, index = self._skip_comments(tokens, index)
-        if token.type != TokenType.IDENTIFIER:
-            return response, index
-        while token.type == TokenType.IDENTIFIER and tokens[index+1].type == TokenType.COLON:
-            attribute_name = str(token.value)
-            if re.match(VARIABLE_CASE, attribute_name) is None:
-                error = InvalidVariableName(
-                    attribute_name,
-                    token.filename,
-                    token.line,
-                    token.column
-                )
-                raise ValueError(error.get_error())
-            token, index = self._expected_next_token(tokens, index, TokenType.COLON)
-            attribute_type, index = self._expect_next_one_of_token(
+        while self._is_token_one_of(
                 tokens,
                 index,
                 [
@@ -155,34 +143,115 @@ class ClassParser(Parser):
                     TokenType.DECIMAL_TYPE,
                     TokenType.INTEGER_TYPE,
                     TokenType.IDENTIFIER
-                ])
-            attribute_node = Node('attribute', attribute_name)
-            attribute_type_node = Node(str(attribute_type))
+                ]):
+            attribute_type = token.type
+            Logger.debug(attribute_type)
+            token, index = self._expected_next_token(tokens, index, TokenType.IDENTIFIER)
+            attribute_name = str(token.value)
+            attribute_node = None
+            initial_value = None
+            if re.match(VARIABLE_CASE, attribute_name) is None:
+                if re.match(CONSTANT_CASE, attribute_name) is None:
+                    error = InvalidVariableName(
+                        attribute_name,
+                        token.filename,
+                        token.line,
+                        token.column
+                    )
+                    raise ValueError(error.get_error())
+                else:
+                    attribute_node = Node('constant-attribute', attribute_name)
+                    next_token, index = self._next_token(tokens, index)
+                    Logger.debug(next_token)
+                    if not self._is_token_one_of(tokens, index, [TokenType.EQUALS]):
+                        error = ConstantNotInitialised(
+                            attribute_name,
+                            token.filename,
+                            token.line,
+                            token.column
+                        )
+                        raise ValueError(error.get_error())
+                    token, index = self._expect_next_one_of_token(tokens, index, [TokenType.INTEGER_VALUE, TokenType.STRING_VALUE])
+                    initial_value = token.value
+
+            else:
+                attribute_node = Node('attribute', attribute_name)
+            attribute_type_node = Node(str(attribute_type), initial_value)
             attribute_node.add_child(attribute_type_node)
+            Logger.debug(attribute_node)
             response.append(attribute_node)
             token, index = self._next_token(tokens, index)
+
+            if token.type == TokenType.EQUALS:
+                token, index = self._next_token(tokens, index)
+                token, index = self._next_token(tokens, index)
         return response, index
 
     def _parse_class_constructors(self, tokens: List[Token], index: int) -> Tuple[List[Node], int]:
         constructors: List[Node] = []
         while self._is_token_one_of(tokens, index, [TokenType.CONSTRUCTOR]):
             constructor = Node('constructor', str(tokens[index].value))
+            Logger.trace(constructor)
             constructors.append(constructor)
             token, index = self._next_token(tokens, index)
             if self._expected_current_token(tokens, index, TokenType.LEFT_BRACKET):
-                parameters, index = self.parse_method_parameters(tokens, index)
+                parameters, index = self._parse_method_parameters(tokens, index)
+                token = tokens[index]
                 constructor.add_child(parameters)
-                if self._expected_next_token(tokens, index, TokenType.RIGHT_BRACKET):
+                if self._expected_next_token(tokens, index, TokenType.LEFT_CURLY_BRACKET):
+                    body, index = self._parse_method_body(tokens, index)
+                    constructor.add_child(body)
                     token, index = self._next_token(tokens, index)
-                    if self._expected_next_token(tokens, index, TokenType.LEFT_CURLY_BRACKET):
-                        body, index = self.parse_method_body(tokens, index)
-                        constructor.add_child(body)
-                        token, index = self._next_token(tokens, index)
-                        if self._expected_next_token(tokens, index, TokenType.RIGHT_CURLY_BRACKET):
-                            token, index = self._next_token(tokens, index)
         return constructors, index
 
     def _parse_class_methods(self, tokens: List[Token], index: int) -> Tuple[List[Node], int]:
         while tokens[index].type != TokenType.RIGHT_CURLY_BRACKET:
             token, index = self._next_token(tokens, index)
         return [], index
+
+    def _parse_method_parameters(self, tokens: List[Token], index: int) -> Tuple[Node, int]:
+        parameters = Node('parameters')
+        token, index = self._next_token(tokens, index)
+        while token.type != TokenType.RIGHT_BRACKET:
+            # if token.type != TokenType.IDENTIFIER:
+            #     return parameters, index
+            # while token.type == TokenType.IDENTIFIER and tokens[index+1].type == TokenType.COLON:
+            #     attribute_name = str(token.value)
+            #     if re.match(VARIABLE_CASE, attribute_name) is None:
+            #         error = InvalidVariableName(
+            #             attribute_name,
+            #             token.filename,
+            #             token.line,
+            #             token.column
+            #         )
+            #         raise ValueError(error.get_error())
+            #     token, index = self._expected_next_token(tokens, index, TokenType.COLON)
+            #     attribute_type, index = self._expect_next_one_of_token(
+            #         tokens,
+            #         index,
+            #         [
+            #             TokenType.CLASS_IDENTIFIER,
+            #             TokenType.INTERFACE_IDENTIFIER,
+            #             TokenType.TYPE_IDENTIFIER,
+            #             TokenType.ENUMERATION_IDENTIFIER,
+            #             TokenType.STRING_TYPE,
+            #             TokenType.BOOLEAN_TYPE,
+            #             TokenType.DECIMAL_TYPE,
+            #             TokenType.INTEGER_TYPE,
+            #             TokenType.IDENTIFIER
+            #         ])
+            #     parameter = Node('attribute', attribute_name)
+            #     parameter_type = Node(str(attribute_type))
+            #     parameter.add_child(parameter_type)
+            #     parameters.add_child(parameter)
+            token, index = self._next_token(tokens, index)
+            # if token.type == TokenType.COMMA:
+            #     token, index = self._next_token(tokens, index)
+        return parameters, index
+
+    def _parse_method_body(self, tokens: List[Token], index: int) -> Tuple[Node, int]:
+        body_node = Node('body')
+        token, index = self._next_token(tokens, index)
+        while token.type != TokenType.RIGHT_CURLY_BRACKET:
+            token, index = self._next_token(tokens, index)
+        return body_node, index
