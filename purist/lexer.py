@@ -21,7 +21,7 @@ class Lexer():
         self._line = 0
         self._column = 0
         lines = text.splitlines()
-        self._lines = [line.strip() for line in lines]
+        self._lines = [line.rstrip() for line in lines]
 
     def next(self) -> Tuple[str | None, Error | None, int, int]:
         """
@@ -44,6 +44,7 @@ class Lexer():
                 while character == ' ' or character == '\t':
                     self._column += 1
                     character = self._lines[self._line][self._column]
+                Logger.trace('line: ', self._line + 1, ',column: ', self._column + 1, ',char:', character)
                 start_column = self._column
                 if character.isalpha():
                     response, error = self._fetch_word()
@@ -63,7 +64,7 @@ class Lexer():
                     response = character
                 else:
                     error = DecodeError(
-                        character,
+                        self._lines[self._line],
                         self._filepath,
                         self._line + 1,
                         self._column + 1
@@ -72,8 +73,8 @@ class Lexer():
                 if self._column >= len(self._lines[self._line]):
                     self._line += 1
                     self._column = 0
-        Logger.trace('next', response, error, start_line + 1, start_column + 1)
-        return response, error, start_line + 1, start_column + 1
+        # Logger.trace('next', response, error, start_line + 1, start_column + 1)
+        return response, error, start_line + 1, self._column + 1
 
     def _fetch_word(self) -> Tuple[str | None, Error | None]:
         word = ''
@@ -87,6 +88,7 @@ class Lexer():
         if character == ':' or character == '@':
             self._column = column
             return self._fetch_url()
+        Logger.trace('word: ', word, ", column: ", self._column)
         return word, None
 
     def _fetch_number(self) -> Tuple[str | None, Error | None]:

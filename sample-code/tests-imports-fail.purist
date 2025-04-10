@@ -1,5 +1,5 @@
 from Builtin.a.b. require [C]
-from _ require [_123]
+	from _ require [_123]
 from a_ require [A_]
 from a_b require [A_B]
 from 123 require [456]

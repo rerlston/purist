@@ -213,40 +213,7 @@ class ClassParser(Parser):
         parameters = Node('parameters')
         token, index = self._next_token(tokens, index)
         while token.type != TokenType.RIGHT_BRACKET:
-            # if token.type != TokenType.IDENTIFIER:
-            #     return parameters, index
-            # while token.type == TokenType.IDENTIFIER and tokens[index+1].type == TokenType.COLON:
-            #     attribute_name = str(token.value)
-            #     if re.match(VARIABLE_CASE, attribute_name) is None:
-            #         error = InvalidVariableName(
-            #             attribute_name,
-            #             token.filename,
-            #             token.line,
-            #             token.column
-            #         )
-            #         raise ValueError(error.get_error())
-            #     token, index = self._expected_next_token(tokens, index, TokenType.COLON)
-            #     attribute_type, index = self._expect_next_one_of_token(
-            #         tokens,
-            #         index,
-            #         [
-            #             TokenType.CLASS_IDENTIFIER,
-            #             TokenType.INTERFACE_IDENTIFIER,
-            #             TokenType.TYPE_IDENTIFIER,
-            #             TokenType.ENUMERATION_IDENTIFIER,
-            #             TokenType.STRING_TYPE,
-            #             TokenType.BOOLEAN_TYPE,
-            #             TokenType.DECIMAL_TYPE,
-            #             TokenType.INTEGER_TYPE,
-            #             TokenType.IDENTIFIER
-            #         ])
-            #     parameter = Node('attribute', attribute_name)
-            #     parameter_type = Node(str(attribute_type))
-            #     parameter.add_child(parameter_type)
-            #     parameters.add_child(parameter)
             token, index = self._next_token(tokens, index)
-            # if token.type == TokenType.COMMA:
-            #     token, index = self._next_token(tokens, index)
         return parameters, index
 
     def _parse_method_body(self, tokens: List[Token], index: int) -> Tuple[Node, int]:
