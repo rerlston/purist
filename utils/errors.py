@@ -20,13 +20,13 @@ class Error(ABC):
         """
         Returns the error message in a preset layout for error reporting
         """
-        padding = ' ' * len(self._message)
-        pointers = '^' * len(self._reason)
+        message_padding = ' ' * len(self._message)
+        error_padding = ' ' * self._column
         message = self._message
         message = f'{message}{self._reason} file: {self._filename},'
         if self._line is not None and self._column is not None:
             message = f'{message} line: {self._line}, column: {self._column}'
-            message = f'{message}\r\n{padding}{pointers}'
+            message = f'{message}\r\n{message_padding}{error_padding}^'
         return message
 
 class InvalidComment(Error):
@@ -42,7 +42,7 @@ class DecodeError(Error):
     """
     def __init__(self, line_content: str, filename: str, line: int, column: int) -> None:
         print(line_content)
-        super().__init__('Unexpected character: ', line_content[column-1: column], filename, line, column)
+        super().__init__('Unexpected character: ', line_content, filename, line, column)
 
 class UnexpectedKeyword(Error):
     """
