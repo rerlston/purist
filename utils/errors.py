@@ -9,8 +9,9 @@ class Error(ABC):
     """
     Base error for all errors in the purist parser
     """
-    def __init__(self, message: str, filename: str, line: int|None = None, column: int|None = None) -> None:
+    def __init__(self, message: str, reason: str, filename: str, line: int|None = None, column: int|None = None) -> None:
         self._message = message
+        self._reason = reason
         self._filename = filename
         self._line = line
         self._column = column
@@ -19,12 +20,13 @@ class Error(ABC):
         """
         Returns the error message in a preset layout for error reporting
         """
-        padding = ' ' * self._column
+        padding = ' ' * len(self._message)
+        pointers = '^' * len(self._reason)
         message = self._message
-        message = f'{message} file: {self._filename},'
+        message = f'{message}{self._reason} file: {self._filename},'
         if self._line is not None and self._column is not None:
             message = f'{message} line: {self._line}, column: {self._column}'
-            message = f'{message}\r\n{padding}^'
+            message = f'{message}\r\n{padding}{pointers}'
         return message
 
 class InvalidComment(Error):
@@ -39,15 +41,16 @@ class DecodeError(Error):
     Error for decoding errors
     """
     def __init__(self, line_content: str, filename: str, line: int, column: int) -> None:
-        super().__init__(f'Unexpected character: "{line_content[:column]}"', filename, line, column + 22)
+        print(line_content)
+        super().__init__('Unexpected character: ', line_content[column-1: column], filename, line, column)
 
 class UnexpectedKeyword(Error):
     """
     Error for unexpected keywords
     """
     def __init__(self, expected: str, found: str, filename: str, line: int, column: int) -> None:
-        message = f'Unexpected keyword or character: "{found}" expected "{expected}"'
-        super().__init__(message, filename, line, column)
+        message = f'Unexpected keyword or character: expected {expected} found: '
+        super().__init__(message, found, filename, line, column)
 
 class InvalidClassName(Error):
     """

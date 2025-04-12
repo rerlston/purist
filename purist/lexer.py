@@ -40,7 +40,7 @@ class Lexer():
             while response is None and error is None and self._column < len(
                 self._lines[self._line]
             ):
-                character: str = self._lines[self._line].rstrip()[self._column]
+                character: str = self._lines[self._line][self._column]
                 while character == ' ' or character == '\t':
                     self._column += 1
                     character = self._lines[self._line][self._column]
