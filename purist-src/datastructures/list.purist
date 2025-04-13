@@ -1,8 +1,8 @@
 class List<T> {
-	T[] value
+	Array value
 
 	public constructor() {
-		this.value = new Array<T>[]
+		this.value = new Array<T>()
 	}
 
 	public constructor(T[] value) {
