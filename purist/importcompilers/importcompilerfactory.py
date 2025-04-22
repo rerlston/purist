@@ -7,7 +7,8 @@ class ImportCompilerFactory:
     __import_managers: Dict[TokenType, str] = {
         TokenType.BUILTIN: "purist.importcompilers.builtincompiler.BuiltInImportCompiler",
         TokenType.IDENTIFIER: "purist.importcompilers.packagecompiler.PackageImportCompiler",
-        TokenType.URL: "purist.importcompilers.gitcompiler.GitImportCompiler"
+        TokenType.URL: "purist.importcompilers.gitcompiler.GitImportCompiler",
+        TokenType.FULL_STOP: "purist.importcompilers.packagecompiler.PackageImportCompiler"
     }
     __defined_managers: Dict[TokenType, object] = {}
 

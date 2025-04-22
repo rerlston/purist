@@ -21,7 +21,7 @@ class Error(ABC):
         Returns the error message in a preset layout for error reporting
         """
         message_padding = ' ' * len(self._message)
-        error_padding = ' ' * self._column
+        error_padding = ' ' * (self._column - 1)
         message = self._message
         message = f'{message}{self._reason} file: {self._filename},'
         if self._line is not None and self._column is not None:
@@ -105,7 +105,7 @@ class InvalidSyntaxError(Error):
     Error for syntax errors
     """
     def __init__(self, message: str, filename: str, line: int, column: int) -> None:
-        super().__init__(message, filename, line, column)
+        super().__init__("Invalid Syntax Error: ", message, filename, line, column)
 
 class ConstantNotInitialised(Error):
     """

@@ -37,8 +37,12 @@ class PackageImportCompiler(Importer, Parser):
             raise ValueError(error.get_error())
         reader = FileReader()
         file_path = source_path
+        Logger.debug(file_path)
+        self.__base_path = os.path.join(os.getcwd(), file_path)
         if not file_path.endswith(".purist"):
             Logger.trace(f"base path: [{self.__base_path}]")
+            if file_path.startswith("../"):
+                self.__base_path = os.path.join(self.__base_path, "..")
             path_parts = file_path.split(".")
             file_path = os.path.join(self.__base_path, *path_parts)
             file_path += ".purist"

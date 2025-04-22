@@ -2,11 +2,10 @@ import re
 
 from typing import List, Tuple
 
+from purist.parser_handlers.type_parser import TypeParser
 from purist.models.node import Node
 from purist.models.token import Token, TokenType
-from purist.parser import Parser
-from utils.errors import (UnexpectedKeyword, InvalidClassName,
-    InvalidInterfaceName, InvalidVariableName, ConstantNotInitialised)
+
 from utils.logger import Logger
 
 CLASS_CASE = r'^[A-Z](([a-zA-Z0-9]+)*)$'
@@ -14,43 +13,51 @@ INTERFACE_CASE = CLASS_CASE
 VARIABLE_CASE = r'^[a-z]([a-zA-Z0-9])*'
 CONSTANT_CASE = r'^[A-Z]([A-Z_0-9])*'
 
-class ClassParser(Parser):
-    def parse(
-            self,
-            tokens: List[Token],
-            index: int,
-            source_path: str|None = None
-        ) -> Tuple[Node, int]:
+class ClassParser(TypeParser):
+    def parse(self, tokens: List[Token], index: int) -> Node:
         index += 1
         Logger.trace('Parsing class')
         Logger.trace('checking for class identifier')
         class_node, index = self._parse_class_identifier(tokens, index)
+        Logger.trace("class found?:", class_node is not None)
         Logger.trace('Checking for generics')
         class_generic, index = self._parse_class_generic(tokens, index)
+        Logger.trace("generics found?:", class_generic is not None)
         Logger.trace('checking for class extends')
         extends_node, index = self._parse_class_extends(tokens, index)
         if extends_node is not None:
+            Logger.trace("class extends found?: true")
             class_node.add_child(extends_node)
+        else:
+            Logger.trace("class extends found?: false")
         Logger.trace('checking for class implements')
         implements_nodes, index = self._parse_class_implements(tokens, index)
         if len(implements_nodes) > 0:
+            Logger.trace("class implements?: true")
             for implements_node in implements_nodes:
                 class_node.add_child(implements_node)
+        else:
+            Logger.trace("class implements?: false")
         Logger.trace('checking for class body start "{"')
         token, index = self._expected_current_token(tokens, index, TokenType.LEFT_CURLY_BRACKET)
+        Logger.trace("class body start found?:", token.type == TokenType.LEFT_CURLY_BRACKET)
         Logger.trace('parsing class attributes')
         attributes, index = self._parse_class_attributes(tokens, index)
         for attribute in attributes:
+            Logger.trace("class attributes found?: ", len(attributes) > 0)
             class_node.add_child(attribute)
         Logger.trace('parsing class constructors')
         constructors, index = self._parse_class_constructors(tokens, index)
+        Logger.trace("class constructors found?:", len(constructors) > 0)
         for constructor in constructors:
             class_node.add_child(constructor)
         Logger.trace('parsing class methods')
         methods, index = self._parse_class_methods(tokens, index)
+        Logger.trace("class methods found?:", len(methods) > 0)
         for method in methods:
             class_node.add_child(method)
         Logger.trace('checking for class body end "}"')
+        Logger.debug(tokens[index])
         token, index = self._expected_current_token(tokens, index, TokenType.RIGHT_CURLY_BRACKET)
         return class_node, index
 

@@ -1,19 +1,19 @@
 class List<T> {
 	Array value
 
-	public constructor() {
+	constructor() {
 		this.value = new Array<T>()
 	}
 
-	public constructor(T[] value) {
+	constructor(T[] value) {
 		this.value = value
 	}
 
 	public toString() string {
 		response = "["
-		for entry in this.value {
-			response = "{response},{entry}"
-		}
+		// for entry in this.value {
+		//	response = "{response},{entry}"
+		// }
 		response = "{response}]"
 		return response
 	}

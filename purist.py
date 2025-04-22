@@ -2,21 +2,21 @@ import os
 import sys
 import time
 
-from purist.importcompilers.importcompilerfactory import ImportCompilerFactory
+from purist.parser import Parser
 from purist.models.token import Token, TokenType
 from utils.logger import Logger, LogLevel
 
 Logger.configure()
 
-def main(filename: str) -> None:
+def main(source_path: str) -> None:
     """
     Entry point to the parser
     """
     try:
-        token = Token(TokenType.IDENTIFIER, filename, 0, 0, filename)
-        compiler = ImportCompilerFactory.get_import_compiler(token)
         start = time.time()
-        ast = compiler.compile(filename)
+        
+        parser = Parser()
+        ast = parser.parse(source_path)
         end = time.time()
 
         # if ast is not None:
