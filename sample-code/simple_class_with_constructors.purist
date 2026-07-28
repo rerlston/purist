@@ -1,0 +1,7 @@
+// this is a simple class with only a constructor definition
+
+class SimpleClassWithConstructors {
+    constructor() {
+        // default constructor
+    }
+}

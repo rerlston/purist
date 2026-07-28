@@ -1,0 +1,8 @@
+// this is a simple class extending another class
+
+class AnotherClass {
+    // no defined methods
+}
+
+class SimpleClass extends AnotherClass {
+}

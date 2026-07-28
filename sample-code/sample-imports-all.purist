@@ -1,0 +1,6 @@
+from Builtin.list require [List]
+from package.package require [MyClass]
+from git@github.com:<owner>/project-name.git[<label|branch>]:folder.folder.file require [ProjectClass] // need ssh file
+from https@github.com/<owner>/project-name[<label|branch>]:folder.folder.folder.file require [ProjectClass] // only public repos
+from library:absolute-path-to-library-name require [LibraryClass] // run nm to get exposed symbols, or find .h in /usr/include
+

@@ -1,0 +1,21 @@
+from Builtin.datastructures.list require [List]
+from Builtin.process.entrypoint require [EntryPoint]
+from Builtin.utilities.logger require [Logger]
+
+from business.sampleBusiness require [SampleBusiness]
+
+class MyEntryPoint implements EntryPoint {
+	SampleBusiness service
+	Logger logging
+	string MY_CONSTANT = "abc123"
+
+	public run(List<String> args) void {
+		this.service.process("a123")
+		integer myInteger = 1
+		number myDecimal = 1.3
+		string myString = "my string is not empty"
+		string myNull = null
+
+		this.logging.info("you have reached the end of the entry point")
+	}
+}

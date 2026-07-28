@@ -1,0 +1,13 @@
+from Builtin.utilities.logger require [Logger]
+
+class SimpleClass {
+	Logger logger
+
+	constructor() {
+		this.logger = new Logger()
+	}
+
+	public myMethod() void {
+		this.logger.info("do nothing")
+	}
+}

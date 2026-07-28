@@ -1,0 +1,49 @@
+from Builtin.datastructures.list require [List]
+
+# A Binary Tree node
+type TreeNode<T> {
+	T data
+	TreeNode left
+	TreeNode right
+}
+
+class BinarySearchTree<T> {
+	TreeNode<T> head
+
+	private process(List<T> items) TreeNode<T> {
+		integer count = len(items)
+		if count <= 0 {
+			return null
+		}
+		leftItems = items[:count // 2]
+		left = process(leftItems)
+		TreeNode<T> parent = new TreeNode<T>(left=left, data='')
+
+		rightItems = items[count // 2:]
+		right = process(rightItems)
+
+		return parent
+	}
+
+	private search(TreeNode<T> currentNode, T searchValue) TreeNode<T> {
+		if currentNode == null {
+			return null
+		}
+		if currentNode.data == searchValue {
+			return currentNode
+		}
+		if searchValue < currentNode.data {
+			return search(currentNode.left, searchValue)
+		} else {
+			return search(currentNode.right, searchValue)
+		}
+	}
+
+	find(T item) TreeNode<T> {
+		return search(head, item)
+	}
+
+	sortedListToBST(List<T> items) void {
+		head = process(items)
+	}
+}

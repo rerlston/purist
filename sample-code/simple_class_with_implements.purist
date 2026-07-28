@@ -1,0 +1,8 @@
+// this is a simple class with only an implements definition
+
+interface AnInterface {
+    // no defined methods
+}
+
+class SimpleClass implements AnInterface {
+}

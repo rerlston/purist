@@ -1,0 +1,11 @@
+class Random {
+	integer seed
+
+	public constructor(integer seed) {
+		this.seed = seed
+	}
+
+	public next() {
+		return 1
+	}
+}

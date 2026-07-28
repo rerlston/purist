@@ -1,0 +1,31 @@
+from Builtin.utilities.logger require [Logger]
+from Builtin.state require [Stateless]
+
+from strategies.sampleInstanceStrategy require [SampleInstanceStrategy]
+from sampleType require [MyCustomType]
+from sampleEnum require [MyCustomEnum]
+
+// despite having a stateful attribute the class implements the Stateless interface
+// which means a single instance exists but with a shared state
+// changing the state's values will affect the other classes with the same dependency
+class SampleBusiness implements Stateless {
+	Logger logging
+	MyCustomType myType
+
+	public process(string variable) integer {
+		logging.info("SampleBusiness.process called")
+
+		this.myType = new MyCustomType(
+			name="Firstname",
+			surname="Family-Name",
+			dateOfBirth="2020/01/01 00:00:00"
+		)
+
+		SampleStrategy myStrategy = new Strategy(variable)
+		if myStrategy != null {
+			myStrategy.process(myType)
+		}
+
+		return 0
+	}
+}

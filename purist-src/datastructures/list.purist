@@ -1,0 +1,20 @@
+class List<T> {
+	Array value
+
+	constructor() {
+		this.value = new Array<T>()
+	}
+
+	constructor(T[] value) {
+		this.value = value
+	}
+
+	public toString() string {
+		response = "["
+		// for entry in this.value {
+		//	response = "{response},{entry}"
+		// }
+		response = "{response}]"
+		return response
+	}
+}

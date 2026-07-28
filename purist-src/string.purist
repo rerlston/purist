@@ -1,0 +1,14 @@
+class String {
+	string value = null
+
+	public constructor(string value) {
+		this.value = value
+	}
+
+	public toString() string {
+		if this.value {
+			return value
+		}
+		return new Null().toString()
+	}
+}
