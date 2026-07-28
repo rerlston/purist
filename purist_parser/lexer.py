@@ -1,129 +1,130 @@
 """
 Purist source code lexer, reads source code and discovers words, numbers, operators, etc
 """
-
-from typing import Tuple
+from abc import ABC, abstractmethod
 
 from utils.errors import DecodeError, Error
+from utils.logger import Logger
 
 VALID_CHARACTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_1234567890'
+VALID_URL_CHARACTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-./_@:[]'
 
 
-class Lexer():
-    """
-    Purist Lexer, reads source code and discovers words, numbers, operators, etc
-    """
-
+class LexerState:
     def __init__(self, filepath: str, text: str) -> None:
         self._filepath = filepath
         self._text = text
         self._line = 0
         self._column = 0
-        self._lines = text.splitlines()
+        lines = text.splitlines()
+        self._lines = [line.rstrip() for line in lines]
+        self._saved_column = 0
+        self._saved_line = 0
 
-    def next(self) -> Tuple[str | None, Error | None, int, int]:
-        """
-        Reads the next source code value from the file
-        Returns a tuple of a discovered value and a specific error if encountered
+    def saveState(self) -> None:
+        self._saved_column = self._column
+        self._saved_line = self._line
 
-        Returns:
-            Tuple[str|None, Error|None]: (discovered value, error)
-        """
-        response: str | None = None
-        error: Error | None = None
-        start_column: int = self._column
-        start_line: int = 0
-        while response is None and error is None and self._line < len(self._lines):
-            start_line = self._line
-            while response is None and error is None and self._column < len(
-                self._lines[self._line]
-            ):
-                character: str = self._lines[self._line][self._column]
-                while character == ' ' or character == '\t':
-                    self._column += 1
-                    character = self._lines[self._line][self._column]
-                start_column = self._column
-                if character.isalpha():
-                    response, error = self._fetch_word()
-                elif character.isdigit() or character == '-':
-                    response, error = self._fetch_number()
-                elif character == '"':
-                    response, error = self._fetch_string()
-                elif character == '/':
-                    response, error = self._fetch_comment_or_divide()
-                elif character in [
-                    '[', ']', '{', '}', '(', ')', ',',
-                    ':', '=', '<', '>', '.', '!', '|'
-                ]:
-                    self._column += 1
-                    response = character
-                else:
-                    error = DecodeError(
-                        character,
-                        self._filepath,
-                        self._line + 1,
-                        self._column + 1
-                    )
-            if response is None or error is None:
-                if self._column >= len(self._lines[self._line]):
-                    self._line += 1
-                    self._column = 0
-        return response, error, start_line + 1, start_column + 1
+    def restoreState(self) -> None:
+        self._column = self._saved_column
+        self._line = self._saved_line
 
-    def _fetch_word(self) -> Tuple[str | None, Error | None]:
-        word = ''
+    def next_character(self) -> str | None:
         character = self._lines[self._line][self._column]
-        while character in VALID_CHARACTERS and self._column < len(self._lines[self._line]):
-            word += character
-            self._column += 1
-            if self._column < len(self._lines[self._line]):
-                character = self._lines[self._line][self._column]
-        return word, None
+        self._column = self._column + 1
+        if self._column >= len(self._lines[self._line]):
+            self._column = 0
+            self._line = self._line + 1
+            if self._line > len(self._lines):
+                return None
+        return character
 
-    def _fetch_number(self) -> Tuple[str | None, Error | None]:
-        number = ''
-        character = self._lines[self._line][self._column]
-        while character in '-1234567890.' and self._column < len(self._lines[self._line]):
-            if character == '.':
-                if '.' in number:
-                    return None, DecodeError(
-                        'too many decimal points',
-                        self._filepath,
-                        self._line + 1,
-                        self._column + 1
-                    )
-            number += character
-            self._column += 1
-            if self._column < len(self._lines[self._line]):
-                character = self._lines[self._line][self._column]
-        return number, None
 
-    def _fetch_string(self) -> Tuple[str | None, Error | None]:
-        string = ''
-        self._column += 1
-        character = self._lines[self._line][self._column]
-        while character != '"' and self._line < len(self._lines):
-            string += character
-            self._column += 1
-            if self._column >= len(self._lines[self._line]):
-                self._line += 1
-                self._column = 0
-                string += '\n'
-            character = self._lines[self._line][self._column]
-            if character == '"' and string[-1] == '\\':
+class LexerResult:
+    def __init__(self, value: str, state: LexerState) -> None:
+        self._value = value
+        self._state = state
+
+    def get_value(self) -> str | None:
+        return self._value
+
+
+class Matcher(ABC):
+    def __init__(self):
+        self._next_matcher = None
+
+    def set_next(self, matcher):
+        self._next_matcher = matcher
+        return matcher
+
+    @abstractmethod
+    def try_match(self, state: LexerState) -> LexerResult | Error:
+        if self._next_matcher:
+            return self._next_matcher.try_match(state)
+        return Error(
+            "Unrecognised character",
+            "Unparsable",
+            state._filepath,
+            state._line,
+            state._column,
+        )
+
+
+class OperationMatcher(Matcher):
+    def try_match(self, state: LexerState) -> LexerResult | Error:
+        return super().try_match(state)
+
+
+class StringMatcher(Matcher):
+    def try_match(self, state: LexerState) -> LexerResult | Error:
+        state.saveState()
+        result = StringMatcher.fetch_string(state)
+        if result is Error:
+            state.restoreState()
+            return super().try_match(state)
+        return result
+
+    def fetch_string(state: LexerState) -> LexerResult | Error:
+        string = ""
+        character = state.next_character()
+        while character != None and character != '"':
+            if character == "\\" and state.next_character() == '"':
                 string += '"'
-                self._column += 1
-                character = self._lines[self._line][self._column]
-        self._column += 1
-        return f'"{string}"', None
+            elif character == "\\" and state.next_charcter() == "\\":
+                string += "\\"
+            else:
+                string += character
+        if string[-1] != '"':
+            return Error(
+s                "Unterminated string literal", "Missing end double quote", state
+            )
+        return LexerResult(string, state)
 
-    def _fetch_comment_or_divide(self) -> Tuple[str | None, Error | None]:
-        first_character = self._lines[self._line][self._column]
-        if self._column + 1 < len(self._lines[self._line]):
-            if first_character == '/' and self._lines[self._line][self._column + 1] == '/':
-                comment = self._lines[self._line][self._column:]
-                self._column = len(self._lines[self._line])
-                return comment, None
-            self._column += 1
-            return '/', None
-        return None, DecodeError(first_character, self._filepath, self._line, self._column)
+
+class CommentMatcher(Matcher):
+    def try_match(self, state: LexerState) -> LexerResult | Error:
+        return super().try_match(state)
+
+
+class NumberMatcher(Matcher):
+    def try_match(self, state: LexerState) -> LexerResult | Error:
+        return super().try_match(state)
+
+
+class WordMatcher(Matcher):
+    def try_match(self, state: LexerState) -> LexerResult | Error:
+        return super().try_match(state)
+
+
+class Lexer:
+    def __init__(self, filepath: str, text: str) -> None:
+        self._matcher = OperationMatcher()
+        current_matcher = self._matcher
+        current_matcher = current_matcher.set_next(StringMatcher())
+        current_matcher = current_matcher.set_next(CommentMatcher())
+        current_matcher = current_matcher.set_next(NumberMatcher())
+        current_matcher = current_matcher.set_next(WordMatcher())
+        self._state = LexerState(filepath, text)
+
+    def next(self) -> LexerResult | Error:
+        return self._matcher.try_match(self._state)
