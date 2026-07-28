@@ -5,7 +5,10 @@ Purist Lexer, converts discovered source code values into tokens
 from enum import Enum
 from typing import List
 
-from lexer import Lexer
+from purist_parser.lexer import Lexer
+from utils.logger import Logger, LogLevel
+
+logger = Logger(log_level=LogLevel.DEBUG)
 
 class TokenType(Enum):
     """
@@ -78,13 +81,13 @@ class Token():
     """
     def __init__(
             self,
-            type: TokenType,
+            token_type: TokenType,
             filename: str,
             line: int,
             column: int,
             value: str|int|float|None = None
     ) -> None:
-        self._type = type
+        self._type = token_type
         self._filename = filename
         self._line = line
         self._column = column
@@ -199,6 +202,10 @@ class Tokenizer():
                 response.append(Token(TokenType.STRING_VALUE, filepath, line, column, next_value))
             elif next_value == ',':
                 response.append(Token(TokenType.COMMA, filepath, line, column, next_value))
+            elif next_value == 'private':
+                response.append(Token(TokenType.PRIVATE, filepath, line, column, next_value))
+            elif next_value == 'public':
+                response.append(Token(TokenType.PUBLIC, filepath, line, column, next_value))
             elif next_value == '[':
                 response.append(Token(TokenType.LEFT_SQUARE_BRACKET, filepath, line, column, next_value))
             elif next_value == ']':
@@ -243,7 +250,7 @@ class Tokenizer():
                 response.append(Token(TokenType.IDENTIFIER, filepath, line, column, next_value))
             next_value, error, line, column = lexer.next()
         if error is not None:
-            print(error.get_error())
+            logger.warning(error.get_error())
             return []
 
         response.append(Token(TokenType.EOF, filepath, line, 0))

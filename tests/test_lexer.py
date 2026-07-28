@@ -1,9 +1,8 @@
 from typing import List
 from unittest import TestCase
 
-from errors import Error
-from lexer import Lexer
-
+from purist_parser.lexer import Lexer
+from utils.errors import Error
 
 class TestLexer(TestCase):
     def test_word_detection(self):
@@ -422,8 +421,8 @@ class TestLexer(TestCase):
 
     def test_sample_code(self):
         # given
-        text = """from Builtin require [Strategy, Stateless, Logger]
-
+        text = """
+from Builtin require [Strategy, Stateless, Logger]
 from strategies.sampleStrategy require [SampleStrategy]
 from sampleType require [MyCustomType]
 
@@ -454,9 +453,65 @@ class SampleInstanceStrategy extends Strategy implements SampleStrategy, Statele
             errors.append(error)
             lines.append(line)
             columns.append(column)
-            print(f'{count}: {string} {line} {column}')
             count = count + 1
 
         # then
         # 'from'
         self.assertEqual(strings[0], 'from')
+        self.assertIsNone(errors[0])
+        self.assertEqual(lines[0], 2, '"from" should be on line 2')
+        self.assertEqual(columns[0], 1, '"from" should be on column 1')
+
+        # 'Builtin'
+        self.assertEqual(strings[1], 'Builtin')
+        self.assertIsNone(errors[1])
+        self.assertEqual(lines[1], 2, '"Builtin" should be on line 2')
+        self.assertEqual(columns[1], 6, '"Builtin" should be on column 6')
+
+        # 'require'
+        self.assertEqual(strings[2], 'require')
+        self.assertIsNone(errors[2])
+        self.assertEqual(lines[2], 2, '"require" should be on line 2')
+        self.assertEqual(columns[2], 14, '"require" should be on column 14')
+
+        # '['
+        self.assertEqual(strings[3], '[')
+        self.assertIsNone(errors[3])
+        self.assertEqual(lines[3], 2, '"[" should be on line 2')
+        self.assertEqual(columns[3], 22, '"[" should be on column 22')
+
+        # 'Strategy'
+        self.assertEqual(strings[4], 'Strategy')
+        self.assertIsNone(errors[4])
+        self.assertEqual(lines[4], 2, '"Strategy" should be on line 2')
+        self.assertEqual(columns[4], 23, '"Strategy" should be on column 23')
+
+        # ','
+        self.assertEqual(strings[5], ',')
+        self.assertIsNone(errors[5])
+        self.assertEqual(lines[5], 2, '"," should be on line 1')
+        self.assertEqual(columns[5], 31, '"," should be on column 31')
+
+        # 'Stateless'
+        self.assertEqual(strings[6], 'Stateless')
+        self.assertIsNone(errors[6])
+        self.assertEqual(lines[6], 2, '"Stateless" should be on line 2')
+        self.assertEqual(columns[6], 33, '"Stateless" should be on column 33')
+
+        # ','
+        self.assertEqual(strings[7], ',')
+        self.assertIsNone(errors[7])
+        self.assertEqual(lines[7], 2, 'second "," should be on line 2')
+        self.assertEqual(columns[7], 42, 'second "," should be on column 42')
+
+        # 'Logger'
+        self.assertEqual(strings[8], 'Logger')
+        self.assertIsNone(errors[8])
+        self.assertEqual(lines[8], 2, '"Logger" should be on line 2')
+        self.assertEqual(columns[8], 44, '"Logger" should be on column 44')
+
+        # ']'
+        self.assertEqual(strings[9], ']')
+        self.assertIsNone(errors[9])
+        self.assertEqual(lines[9], 2, '")" should be on line 2')
+        self.assertEqual(columns[9], 50, '")" should be on column should be 50')

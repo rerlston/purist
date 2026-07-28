@@ -1,6 +1,6 @@
 from unittest import TestCase, mock
 
-from parser import Parser
+from purist_parser.parser import Parser
 
 
 class TestParser(TestCase):

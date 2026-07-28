@@ -4,7 +4,7 @@ Purist source code lexer, reads source code and discovers words, numbers, operat
 
 from typing import Tuple
 
-from errors import DecodeError, Error
+from utils.errors import DecodeError, Error
 
 VALID_CHARACTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_1234567890'
 

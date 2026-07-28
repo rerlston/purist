@@ -43,7 +43,7 @@ class UnexpectedKeyword(Error):
     Error for unexpected keywords
     """
     def __init__(self, expected: str, found: str, filename: str, line: int, column: int) -> None:
-        message = f'Unexpected keyword: "{found}" expected "{expected}"'
+        message = f'Unexpected keyword or character: "{found}" expected "{expected}"'
         super().__init__(message, filename, line, column)
 
 class InvalidClassName(Error):
