@@ -1,0 +1,309 @@
+language called purist unless already exists
+
+*** The purist language only allowing standards that are normally enforced in code reviews ***
+
+Build AST as binary tree, node, with single left and optional single right. Traverse in order
+
+A tokenizer breaks a stream of text into tokens, usually by looking for whitespace (tabs, spaces, new lines). - decoder
+
+A lexer is basically a tokenizer, but it usually attaches extra context to the tokens -- this token is a number, that token is a string literal, this other token is an equality operator. - tokenizer
+
+A parser takes the stream of tokens from the lexer and turns it into an abstract syntax tree representing the application represented by the original text. - parser
+
+Curly brackets for bodies not space or tabs
+
+All variables are variable unless defined as constant, no let or var or const reserved words they implied by the naming standard
+
+Classes/Services names, interfaces/ports names and types/models names are Pascal case with first letter as uppercase, no underscores no dashes, only a-z/A-Z and 0-9 allowed
+Method names and variable names are camel case with the first letter lower case, only a-z/A-Z and 0-9 allowed
+Constants are all upper case, only A-Z, underscore and 0-9 allowed. Constants as attributes are automatically public static and unmodifiable, are accessible outside of the class Constants inside of methods are only visible inside of the scope of the method. Constants must be initialised when defined, can be a built-in type or custom type, or can be a class type in a method (not in an attribute) using new which then supports mocking in unit tests (factory of factory pattern: normal runtime factory, unit test factory)
+
+use AST to determine cycloatic complexity score of method, report warnings and errors for medium to high complexity methods
+
+No round brackets in while or for-loops
+Use of "in and of" for loops
+Round brackets are only used in method definitions, when calling methods and for prioritising calculation order
+
+Classes are first class - not functional programming. Entry point is a class that implements the EntryPoint interface with a run method
+There is a built-in class called Config that can be injected into the class needing access to the application Config
+Logging is a built-in class and is supported with auto injection (have terminal colour logging for each log level, support standard, json and format logging)
+
+Support Interfaces/ports
+
+Support Types/models for custom data types - data models
+
+type support: string, int, bit, byte, long, word, short, numbers, fixedpoint, bool, null
+data structure support: list, dict, grid, matrix, tuple, queue, stack, binary-tree, graph, vector(?)
+
+All types, data structures and custom classes are all automatically objects and inherit from the base Object type which has built-in methods of: .type(), .equals() and .toStr() available on all, autoboxing/unboxing supported.
+
+All the data structures will need to support generics ... java or python style?
+
+List internally works like a linked list for easy append and insert at specific location, list grows easier than a predefined length. For gaming this might not work so well for performance, maybe as an alternative a game could use a grid, matrix or vector?
+Grid is a 2 dimension array of rows with named columns (similar to CSV),  There is no correlation between number of columns and number of rows. Columns can be named or unnamed. unnamed grid uses indexes like a 2 dimension list
+Dict internally works as a hash map, or named linked list, Dict is similar to JS Objects but without function definitions.
+Matrix is a unanmed grid but the number of columns equals the number of rows: https://www.geeksforgeeks.org/matrix/
+Tuple is a non editble/immutable list that does not have any set methods, only get methods (by index), the constructor takes any other data structure as a parameter and then the data is set or list = tuple(), grid = tuple(tuple()), matrix = tuple(tuple()), dict = tuple(values-tuple())?
+Queue is a linked list with methods of enqueue and dequeue, enqueue is at the head, dequeue is from the tail. Head is newest, tail is oldest
+Stack is a linked list with methods of push and pop, push is at the head, pop is head. Head is newest, tail is oldest.
+Graph is internally a dict and a linked list, with edges and nodes, the nodes are stored in the dict, the edges are the links between nodes. a node can exist without links/edges, links/edges must exist with connecting between 2 nodes. Graphs can be directed or undirected, and they can be cyclic or be acyclic. Graph traversal algorithms include breadth-first search and depth-first search
+Tree is internally represented as a graph, multiple children are allowed, binary tree has a max of 2 edges per node (left and/or right), binary search tree has left child as less than value of right child, left is less than parent value, right is higher value than parent value. https://www.bacancytechnology.com/qanda/python/tree-implementation-in-python and  https://builtin.com/articles/tree-python and https://www.programiz.com/dsa/trees
+    Can have a n-tree with n-number of children vertices/links instead of left-right children
+Implement socket server and client creation, then http implement of socket, then rest implement of http
+File management capability
+Socket managemtn capability
+Thread management capability
+out of the box supported libriaries?
+    - pthreads - library handles threading
+    - linux and mac use packagelib to get default paths
+    - libc - file io, sockets, terminal display
+    - libm - math functions
+    - SDL - game library
+
+
+will need to support constructors and destructors
+
+Ability to convert *.h into "virtual service" with reference to .so/.dll (use ABI?)
+
+Autoboxing is supported with all types. {} Is used for dictionary autoboxing, [[]] is used for grid autoboxing without column names though, need to solve this with syntax somehow
+autobox syntax:
+    isEqual(5) // result is numerically compared which results in false, . isEqual is executed for 4 == 5
+    'this is a string'.type() // result is String
+    toStr().type() // result is a String
+    type() // result is an Integer
+    For == where types are different then each will have .toStr called and the string values compared with .isEqual
+        So:
+        '4' == 4 is true
+        '5' == 3 is false
+        For dictionaries:
+        b = {}
+        c = {}
+        b == c // is true when all of the keys names match and the values of the keys also match, extra keys in either results in false for .isEqual
+
+All classes/services, interfaces/ports, types/models are always public, methods must specify private or public, attributes are always private, attributes can't be public and can only be accessed via "this".
+
+Injection management is part of the language, instance creation is via a factory which is the injection manager. The injection manager is the only "singleton" invoked by using "new".
+Class can be registered as stateful or stateless, when no stateful or stateless interface is implemented then it is stateless when it has no attributes, stateful if any attribute is a type/model, or stateless if all attributes are classes or constants, (factory creates new instances for stateful classes, same instance reuse for stateless), you can have a class with state but still declare it stateless, or a class can implement stateful eventhough by default it is not stateful.
+Stateful or stateless are optional interfaces.
+Can the injection manager support all creational software design patterns? Singleton, factory, abstract factory and builder, since statics are not available the injection manager won't directly support singleton but all stateless class instances are already singletons since the factory only produces one instance ever.
+Is factory necessary when there is a central one.
+Builder is interesting because it requires delayed construction until the build method is called.
+Abstract factory is not common enough to implement the need on version 1
+
+Garbage collection is managed by the injection manager, the exact mechanism is still to be determined... Could be: when requesting a new stateless instance then the counter is incremented, when it goes out of scope the factory is called to dereference the instance, the counter is decreased by one. When there are zero instances after 1 minute then the single class instance is destroyed and the memory is freed, for stateful classes and types there is always 1 unique instance, when it goes out of scope then it is dereferenced, the reference count is decreased until zero then watched for 1 minute then the memory is freed. Creating 2 strings with the same literal value results in 2 different String class instances with "true" for .isEqual, yes they take up twice the memory.
+Use variable reference to an existing string instance if needing to save memory, when using a new variable (or constant) to an existing instance then the reference counter increases and then decreases with the variable goes out of scope. I guess using auto string matching to save memory over performance could be a compiler option.
+
+Data classes are defined as types not classes, the injection manager creates a new instance each time "new" is requested. Types support auto getter and setter methods, overriding of getter and setter methods is supported including overriding .type(), .isEqual() and .toStr() methods
+
+There is no static option so no singletons, implementing statefull interface makes it a static.
+
+Single inheritance from other classes
+
+Multiple implementation of interfaces supported
+
+Support abstract classes
+
+If injection manager is requested to instantiate interface or abstract class then a mocked implementation is returned, this makes unit testing easier without needing an additional library, methods like wasCalled, wasCalledWith, calledTimes, and calledBefore, calledAfter are automatically supported on mocked objects.
+Partially implemented interfaces become abstract classes. If the class implements the unit test interface then any test method that creates a new instance of a class will have its class attributes automatically mocked, any new types are not mocked
+Classes with attributes of interfaces or abstract classes are mocked, don't use auto injection attributes for dynamic classes,
+
+Imports are in this syntax: from <module> require [comma separated list of classes]
+from Builtin.list require [List]
+from package.package require [MyClass]
+from git@github.com:<owner>/project-name.git[<label|branch>]:folder.folder.file require [ProjectClass] // need ssh file - compile to .o once downloaded and store the compiled result in <project-root>/bin
+from https@github.com/<owner>/project-name[<label|branch>]:folder.folder.folder.file require [ProjectClass] // only public repos - compile to .o once downloaded and store the compiled result in <project-root>/bin
+from library:absolute-path-to-library-name require [LibraryClass] // run nm to get exposed symbols, or find .h in /usr/include, auto generate "virtual service" - no pre-compile
+Git is supported as an import (git is the library/package manager)
+
+
+Http requests and responses are built in via os libraries
+
+No type hinting, full typing only, no "any" type allowed, null is the default to all variables that are not initialised yet, no need to explicitly specify a variable can be null
+
+Annotation is a type of interface with a specific set of methods that need to be implemented.
+
+Logging is built in, just add as an attribute of the class the facory will insert the instance, any class can change the log style which will affect all other classes with the logging attribute. Logger has log out style definition which is stateful but is defined as stateless so that the same instance is supplied to all classes requesting it
+
+Strategy is an interface that extends the stateless interface, the custom strategy class must call super with the registration name so that the injection manager acts like a factory and instantiates by registered name and not by class name. a strategy cannot be used on a class/service that also implements stateful
+
+Will need to think of way to logically name a strategy so that it can be found logically not physically, so resolves at runtime not compile time
+
+normal injection management syntax:
+class B {}
+a = new B()
+
+Strategy factory syntax:
+class B implements AnInterface, Strategy
+a: AnInterface = new Strategy('B')
+
+Types syntax:
+type MyDataType { a: int, b: string }
+myData = new MyDataType(a=1, b='this is a value')
+myData.b = 'changed to this value' // setter
+myData.b = 1 // error
+myData.b = null // error
+
+Parameters or type values can be defined as multiple types with pipe separators, nulls are allowed
+type MyCustomType {
+    a: int | string | null
+}
+
+enums are:
+type MyEnum {
+    a: string ["value1" | "value2" | "value3" ] // nuils are not a valid "enum"
+}
+
+Auto injection of private attributes:
+class A {
+    private b: B
+    public myMethod() { b.callSomeMethod()}
+}
+a = new A() // instance of B is injected as well if B is a class and not a type, if B is a type then class A is auto-marked stateful and B is not autoinjected, B is null by default, if B is a class then B is autoinjected to class A and class A is auto-marked stateless, implementing either stateful or stateless interfaces changes the auto-marked state of the class
+
+All strings literals only support double quote surrounding the string literal, variable substitution is built-in into every string literal with ${var-name}, any string literal can use single quote inside of the string but if a double quote is needed inside of the string then use \"
+
+1. Create lexer
+2. Create Tokenzier
+3. Create AST (abstract syntax tree)
+4. Create interpreter/compiler/llvm mapper
+
+Look into Rust's memory safety and no need for manual developer requested memory management and garbage collection
+
+include dynamic library management, including posix threading
+
+additional thoughts:
+     * clean code enforced
+     * check cyclomatic complexity as part of the compiler
+     * find a source code structure that enforces layering and anti layer pollution
+     * model only parameters in public methods
+
+possibly make "type MyData" rather as "model MyData" and "class MyService" as "service MyService"
+example of model with validation
+// Declaring a reusable string
+enum type AccountStatus = "active" | "suspended" | "closed"
+model Account {
+   id: UUID,
+   name: string,
+   status: AccountStatus // Clean, readable field assignment
+}
+
+
+possible project structure:
+<project-root>/
+    /listeners              // application input managers (when layer)
+        /models             // entry point models (rest request/response, message queue payload definitions, etc)
+    /logic                  // business layer (what layer)
+    /models                 // domain models for entry point and infrastructure services to communicate with the business layer
+    /interfaces             // interfaces/ports for business to call and infrastructure services to implement, or for infrastructure to call the listeners
+    /infrastructure         // (how layer)
+        /respositories      // db code
+            /entities       // db models
+        /services           // non repository services
+            /models         // non repository service models
+    /tests
+        /listeners
+        /logic
+        /interfaces
+            /repositories
+            /services
+    <app-name.purist>       // main application entry point that implements EntryPoint interface/port) this sets up the application config and prepares listeners, listeners are setup for an callbacks from infrastructure
+
+listeners call logic/business layer or infrastructure/services services not infrastructure/repositories
+logic/business can call infrastructure only
+infrastructure cannot call other infrastructure, logic/business must orchestrate
+infrastrucuture/services may do callbacks to listeners for event driven needs like keyboard input, etc? this implies that the callbacks can be listeners or logic/business classess/services
+
+
+auto mapping so that business only uses business models/types and business clients automap their models to business models, business calling infrastructure services accept business models but automap to infrastructure models, here is here it can be done when the fields names in each model do not match exactly
+1. The Syntax: Property Pointer Literals
+Instead of passing a string, we can introduce a token or prefix (like ::, ., or #) that tells the compiler they are pointing directly to an active property definition on a specific type.
+Let’s use # as a property reference operator:
+// Inline type-safe mapping using reflectable property references
+domainModel = request as UserDomain({
+    #EntryRequest.user_email : #UserDomain.email
+});
+Because the dictionary keys and values are actual code symbols, look at what happens instantly:Autocompletion: As soon as the developer types #EntryRequest., the IDE lists only the valid properties of that struct.
+Refactoring: If the developer renames user_email to emailAddress in the EntryRequest file, the IDE can automatically update this mapping reference everywhere across the application.
+Compile-Time Verification: If a property is deleted or misspelled, the compiler throws an error immediately:
+Error: 'user_email' does not exist on type 'EntryRequest'.
+
+2. Streamlining the Syntax (Type Inference)
+To keep the code clean and prevent developers from typing long class names repeatedly, the compiler can infer the types based on the context of the as expression.
+Since the compiler already knows the source is an EntryRequest and the target is a UserDomain, can allow a shortened syntax:
+// Ultimate clean syntax via compiler type-inference
+domainModel = request as UserDomain({ .user_email : .email });
+The compiler under the hood expands .user_email to EntryRequest.user_email and .email to UserDomain.email.
+
+3. Impact on Unit Testing and Maintenance
+This approach completely changes the game for unit testing and maintainability:Zero "Mapping Tests" Needed: In other languages, developers write hundreds of trivial unit tests just to ensure fields map correctly from Layer A to Layer B. In this language, the compiler is the test. If it compiles, the fields are guaranteed to exist and match types.Safe Evolution: When the application grows and you modify database entity schemas, the compiler instantly highlights every single broken architectural boundary across the entire codebase. You can confidently refactor schemas without fearing silent runtime failures.
+
+4. Handling Nested Domain ObjectsIn strict domain-driven design, a UserDomain might contain an Address sub-object, while the flat HTTP request contains street and city at the root.
+The type-safe syntax can handle this via nested property paths:
+domainModel = request as UserDomain({
+    .street : .address.street,
+    .city   : .address.city
+});
+
+By enforcing this, the langauge has designed a system that ensures strict architectural layering, guarantees type safety, offers high-velocity developer ergonomics, and eliminates the maintenance overhead of traditional mapping layers.
+
+
+
+
+allowing the language to interface to deployed/running applications/libraries/services written in other languages
+Step 1: The Header-to-Component Mapping
+Instead of manual translation of full source code to purist, the language toolchain reads the library's C header file (sdl.h) and automatically generates native wrappers for the language.
+[ SDL.dll / SDL.so ]  <─── Bound via System ABI ───>  [ infrastructure/Auto-Generated wrapper.purist ]
+                                                                  │
+                                                                  ▼
+                                                       [ Your Business Layer ]
+
+
+Step 2: The Syntax Specification for External Libraries
+To keep the unsafe, low-level nature of C out of the clean business layers, you can introduce an extern block syntax that maps the DLL functions directly to the language's types:
+// Telling the compiler to load the external shared library
+virtual service "libSDL2" {
+    // Mapping raw C functions to the language's native service signatures
+    public SDL_Init(flags: uint32) -> int32
+    public SDL_CreateWindow(title: string, w: int, h: int)
+}
+The "Clean Code" Challenge: Managing Unsafe Code
+Because the language is strict values clean architecture, safety, and domain modeling, loading a raw C library presents a massive design conflict. C libraries use raw pointers, can cause memory leaks, and completely bypass the strict model validation rules.
+To maintain the architectural integrity, the specification should enforce an FFI Isolation Rule:The Infrastructure Boundary Only: External extern bindings are strictly forbidden from being imported into the /business layer. They can only exist inside the /infrastructure folder (e.g., /infrastructure/graphics/sdl_adapter.purist).
+The Sanitization Tax: The infrastructure adapter must wrap the messy, unsafe C endpoints inside the clean language structures. It translates raw C integers and strings into supported type-safe alternatives, validated model types before passing the data up to the business layer.
+
+
+
+
+In high-performance game loops running at 60, 144, or 240 frames per second, passing data sequentially through three layers of abstraction and object allocations creates a "garbage collection tax" and CPU cache misses that will tank the frame rate.
+Here is a popssible solution to the listener/entry point vs infrastructure where user input controls the process dilemma.
+
+1. Solving the Game Input Dilemma: The Inverted Inflow
+The entry point (the Game Loop) must get hardware events from the infrastructure layer (the hardware wrapper). This does not bypass the business layer; it treats infrastructure as a supplier of raw data to the entry point.Think of it like an API Gateway or a Web Server. A REST API entry point reads a raw byte stream from a socket (Infrastructure) before passing a structured model down to the Business layer. A game loop behaves exactly the same way:
+  [ Infrastructure layer: Hardware/SDL ]
+                 │
+           ( Raw Event Bytes )
+                 ▼
+  [ listener layer: Game Loop ]
+                 │
+           ( Mapped to Pure Domain Model Input )
+                 ▼
+  [ Business Layer: Game State Engine ]
+Use code with caution.Infrastructure polls the hardware and produces raw events.The Entry Point grabs those raw events and immediately translates them into clean, immutable Domain Models (e.g., model ActionInput { command: "jump" | "shoot" }).The Business Layer receives the pure ActionInput model, evaluates the collision or game rules, and calculates the next frame of state.
+
+2. The Game Architecture Realignment
+To handle game development properly, the role of the layers needs a subtle mental shift. In a game, the "Database" is not a remote SQL server; it is the In-Memory Game State (the positions of all players, monsters, and bullets).
+Listener/Entry Point (The Heartbeat): The infinite loop that regulates delta time, polls infrastructure for raw user inputs, feeds them to the business engine, and triggers the render step.
+Business Layer (The Rules Matrix): Pure mathematical functions that update the game state. It contains no graphics logic. It simply checks if a coordinate collides with a wall or updates a health value.
+Infrastructure Layer (The Side-Effect Box): The concrete drivers that physically write pixels to a screen (SDL, WebGPU) or play audio bytes to a speaker.
+
+
+3. The Performance Trade-off: Data-Oriented Language DesignTo make the language truly viable for gaming while keeping these rules, you cannot use heavy, pointer-heavy structures. The model system must be built for Data-Oriented Design (DOD) rather than traditional Object-Oriented design. Because it is specified that the models are pure type definitions/records with single inheritance and no methods, the compiler can perform a massive optimization called Contiguous Memory Allocation
+// Array of traditional Objects in memory (Terrible for games / Cache Misses):
+[Pointer -> Object] -> [Pointer -> Object] -> [Pointer -> Object]
+
+// The language's pure Models in memory (Amazing for games / Cache Friendly):
+[Data][Data][Data][Data][Data][Data][Data]
+Use code with caution.When the business layer processes thousands of projectile coordinates, the stateless services can stream through an array of pure models packed tightly together in memory. The CPU cache stays full, the operations are blindingly fast, and the code looks incredibly clean because the math logic is isolated inside the business service, completely separated from the data structures.The VerdictClean code can work beautifully for games, provided the language treats data as flat, tightly packed arrays (Data-Oriented) rather than heavy, encapsulated object graphs. The concept of separating model from service is actually the exact foundation used by modern high-performance game architectures like ECS (Entity Component System)
+
+
+attempt to implement 20 games challenge https://20_games_challenge.gitlab.io/ using the language

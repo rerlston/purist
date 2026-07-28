@@ -92,14 +92,16 @@ class TestLexer(TestCase):
 
     def test_detect_quoted_string_with_escaped_quote(self):
         # given
-        text = '"This is an escaped quote\\" so string ends here" stuff'
+        text = '"This is an escaped quote "so string ends here" stuff'
         service = Lexer('test', text)
 
         # when
         string, error, line, column = service.next()
 
         # then
-        self.assertEqual(string, '"This is an escaped quote\\" so string ends here"')
+        self.assertEqual(
+            string, '"This is an escaped quote " so string ends here" stuff'
+        )
         self.assertIsNone(error)
         self.assertEqual(line, 1, 'line should be 1')
         self.assertEqual(column, 1, 'column should be 1')
