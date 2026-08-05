@@ -19,7 +19,8 @@ class Error(ABC):
         self._line = state.line
         self._column = state.column
 
-    def get_error(self) -> str:
+    @property
+    def error(self) -> str:
         """
         Returns the error message in a preset layout for error reporting
         """
@@ -28,7 +29,7 @@ class Error(ABC):
         message = self._message
         message = f"{message}{self._reason} file: {self._filename},"
         if self._line is not None and self._column is not None:
-            message = f"{message} line: {self._line}, column: {self._column}"
+            message = f"{message} line: {self._line + 1}, column: {self._column}"
             message = f"{message}\r\n{message_padding}{error_padding}^"
         return message
 

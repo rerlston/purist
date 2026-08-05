@@ -1,5 +1,5 @@
 interface MyInterface {
-    myMethod()
+    void myMethod()
 
-    myOtherMethodWithParams(string parameter)
+    string myOtherMethodWithParams(string parameter)
 }
