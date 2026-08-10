@@ -4,7 +4,7 @@ import time
 
 from purist.parser import Parser
 from purist.models.token import Token, TokenType
-from utils.logger import Logger, LogLevel
+from purist.utils.logger import Logger, LogLevel
 
 Logger.configure()
 

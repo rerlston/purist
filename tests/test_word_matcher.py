@@ -2,9 +2,14 @@ from unittest import TestCase
 
 from purist.lexer.word_matcher import WordMatcher
 from purist.models.lexer_models import LexerResult, LexerType, LexerState
+from purist.utils.logger import Logger, LogLevel
 
 
 class TestLexer(TestCase):
+
+    def setUp(self):
+        Logger.configure(log_level=LogLevel.TRACE)
+
     def test_reserved_type_word(self):
         # given
         text = "type"
@@ -17,7 +22,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.RESERVED_WORD)
+        self.assertEqual(result.type, LexerType.MODEL)
 
     def test_reserved_service_word(self):
         # given
@@ -31,7 +36,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.RESERVED_WORD)
+        self.assertEqual(result.type, LexerType.SERVICE)
 
     def test_reserved_class_word(self):
         # given
@@ -45,7 +50,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.RESERVED_WORD)
+        self.assertEqual(result.type, LexerType.SERVICE)
 
     def test_reserved_nodel_word(self):
         # given
@@ -59,7 +64,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.RESERVED_WORD)
+        self.assertEqual(result.type, LexerType.MODEL)
 
     def test_reserved_interface_word(self):
         # given
@@ -73,7 +78,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.RESERVED_WORD)
+        self.assertEqual(result.type, LexerType.INTENT)
 
     def test_reserved_contract_word(self):
         # given
@@ -87,7 +92,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.RESERVED_WORD)
+        self.assertEqual(result.type, LexerType.INTENT)
 
     def test_reserved_portal_word(self):
         # given
@@ -101,7 +106,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.RESERVED_WORD)
+        self.assertEqual(result.type, LexerType.INTENT)
 
     def test_reserved_enumeration_word(self):
         # given
@@ -115,7 +120,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.RESERVED_WORD)
+        self.assertEqual(result.type, LexerType.ENUMERATION)
 
     def test_reserved_private_word(self):
         # given
@@ -507,7 +512,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.RESERVED_WORD)
+        self.assertEqual(result.type, LexerType.BLUEPRINT)
 
     def test_reserved_concept_word(self):
         # given
@@ -521,7 +526,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.RESERVED_WORD)
+        self.assertEqual(result.type, LexerType.BLUEPRINT)
 
     def test_reserved_conceptual_word(self):
         # given
@@ -535,7 +540,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.RESERVED_WORD)
+        self.assertEqual(result.type, LexerType.BLUEPRINT)
 
     def test_reserved_theory_word(self):
         # given
@@ -549,7 +554,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.RESERVED_WORD)
+        self.assertEqual(result.type, LexerType.BLUEPRINT)
 
     def test_reserved_theoretical_word(self):
         # given
@@ -563,7 +568,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.RESERVED_WORD)
+        self.assertEqual(result.type, LexerType.BLUEPRINT)
 
     def test_reserved_virtual_word(self):
         # given
@@ -633,7 +638,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.RESERVED_WORD)
+        self.assertEqual(result.type, LexerType.FULFILLS)
 
     def test_reserved_extends_word(self):
         # given
@@ -647,7 +652,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.RESERVED_WORD)
+        self.assertEqual(result.type, LexerType.BEHAVES_LIKE)
 
     def test_reserved_void_word(self):
         # given

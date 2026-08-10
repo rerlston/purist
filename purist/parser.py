@@ -2,8 +2,8 @@ import os
 
 from typing import List, Tuple
 
-from utils.logger import Logger
-from utils.errors import InvalidSyntaxError
+from purist.utils.logger import Logger
+from purist.utils.errors import InvalidSyntaxError
 
 from purist.import_handlers.import_factory import ImportFactory
 from purist.parser_handlers.parser_factory import ParserFactory

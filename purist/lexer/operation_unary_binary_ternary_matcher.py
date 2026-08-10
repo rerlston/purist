@@ -21,10 +21,10 @@ class OperationUnaryNotOperatorMatcher(BaseOperatorMatcher):
     ) -> LexerResult | None:
         string = state.peek()
         if previous_match is not None:
-            Logger.info(f"previous: {previous_match.type}")
+            Logger.trace(f"previous: {previous_match.type}")
             if previous_match.type == LexerType.BINARY_LOGIC:
                 if string[0] == "!":
-                    Logger.info("found: !")
+                    Logger.trace("found: !")
                     return LexerResult(LexerType.UNARY_LOGIC, string[0], state)
         return None
 
@@ -35,11 +35,11 @@ class OperationUnaryIncrementOperatorMatcher(BaseOperatorMatcher):
     ) -> LexerResult | None:
         string = state.peek()
         if previous_match is not None:
-            Logger.info(f"previous: {previous_match.type}")
+            Logger.trace(f"previous: {previous_match.type}")
             if previous_match.type == LexerType.IDENTIFIER:
                 if string[0] == "+" and string[1] == "+":
-                    Logger.info("found: ++")
-                    return LexerResult(LexerType.UNARY_LOGIC, string[0], state)
+                    Logger.trace("found: ++")
+                    return LexerResult(LexerType.UNARY_LOGIC, "++", state)
         return None
 
 
@@ -49,11 +49,11 @@ class OperationUnaryDecrementOperatorMatcher(BaseOperatorMatcher):
     ) -> LexerResult | None:
         string = state.peek()
         if previous_match is not None:
-            Logger.info(f"previous: {previous_match.type}")
+            Logger.trace(f"previous: {previous_match.type}")
             if previous_match.type == LexerType.IDENTIFIER:
                 if string[0] == "-" and string[1] == "-":
-                    Logger.info("found: --")
-                    return LexerResult(LexerType.UNARY_LOGIC, string[0], state)
+                    Logger.trace("found: --")
+                    return LexerResult(LexerType.UNARY_LOGIC, "--", state)
         return None
 
 
@@ -63,41 +63,41 @@ class OperationUnaryNegationOperatorMatcher(BaseOperatorMatcher):
     ) -> LexerResult | None:
         string = state.peek()
         if previous_match is not None:
-            Logger.info(f"previous: {previous_match.type}")
+            Logger.trace(f"previous: {previous_match.type}")
             if previous_match.type == LexerType.BINARY_LOGIC:
                 if string[0] == "-":
-                    Logger.info("found: -")
+                    Logger.trace("found: -")
                     return LexerResult(LexerType.UNARY_LOGIC, string[0], state)
         return None
 
 
 # binary: addition (+), subtraction (-), multiplication (*), mod (%), divide (/), assignment (=), comparison (==, <, >, !=, <=, >=), logical or (||), logical and (&&), binary or (|), binary and (&), binary xor (^), power (**)
-class OperationBinaryOperatorMatcher(BaseOperatorMatcher):
+class OperationBinaryMathsOperatorMatcher(BaseOperatorMatcher):
     def try_match(
         self, state: LexerState, previous_match: LexerResult | None
     ) -> LexerResult | None:
         string = state.peek()
         if previous_match is not None:
-            Logger.info(f"previous: {previous_match.type}")
+            Logger.trace(f"previous: {previous_match.type}")
             if previous_match.type in [
                 LexerType.NUMBER,
                 LexerType.IDENTIFIER,
             ]:
                 if string[0] in ["+", "-", "%", "^"]:
-                    Logger.info(f"found: {string[0]}")
+                    Logger.trace(f"found: {string[0]}")
                     return LexerResult(LexerType.BINARY_LOGIC, string[0], state)
                 if string[0] == "/":
                     if string[1] == "/":
                         return None
                     else:
-                        Logger.info("found: /")
+                        Logger.trace("found: /")
                         return LexerResult(LexerType.BINARY_LOGIC, string[0], state)
                 if string[0] == "*":
                     if string[1] == "*":
-                        Logger.info("found: **")
+                        Logger.trace("found: **")
                         return LexerResult(LexerType.BINARY_LOGIC, "**", state)
                     else:
-                        Logger.info("found: *")
+                        Logger.trace("found: *")
                         return LexerResult(LexerType.BINARY_LOGIC, string[0], state)
             return None
 
@@ -108,14 +108,14 @@ class OperationBinaryAssignmentMatcher(BaseOperatorMatcher):
     ) -> LexerResult | None:
         string = state.peek()
         if previous_match is not None:
-            Logger.info(f"previous: {previous_match.type}")
+            Logger.trace(f"previous: {previous_match.type}")
             if previous_match.type == LexerType.IDENTIFIER:
                 if string[0] == "=":
                     if string[1] == "=":
-                        Logger.info("found: ==")
+                        Logger.trace("found: ==")
                         return LexerResult(LexerType.BINARY_LOGIC, "==", state)
                     else:
-                        Logger.info("found: =")
+                        Logger.trace("found: =")
                         return LexerResult(LexerType.BINARY_LOGIC, string[0], state)
             return None
 
@@ -125,12 +125,12 @@ class OperationBinaryNegativeComparisonMatcher(BaseOperatorMatcher):
         self, state: LexerState, previous_match: LexerResult | None
     ) -> LexerResult | None:
         string = state.peek()
-        if previous_match is not None and previous_match in [
+        if previous_match is not None and previous_match.type in [
             LexerType.NUMBER,
             LexerType.IDENTIFIER,
         ]:
             if string[0] == "!" and string[1] == "=":
-                Logger.info("found: !=")
+                Logger.trace("found: !=")
                 return LexerResult(LexerType.BINARY_LOGIC, "!=", state)
         return None
 
@@ -140,16 +140,16 @@ class OperationBinaryGreaterComparisonMatcher(BaseOperatorMatcher):
         self, state: LexerState, previous_match: LexerResult | None
     ) -> LexerResult | None:
         string = state.peek()
-        if previous_match is not None and previous_match in [
+        if previous_match is not None and previous_match.type in [
             LexerType.NUMBER,
             LexerType.IDENTIFIER,
         ]:
             if string[0] == ">":
                 if string[1] == "=":
-                    Logger.info("found: >=")
+                    Logger.trace("found: >=")
                     return LexerResult(LexerType.BINARY_LOGIC, ">=", state)
                 else:
-                    Logger.info("found: >")
+                    Logger.trace("found: >")
                     return LexerResult(LexerType.BINARY_LOGIC, ">", state)
         return None
 
@@ -159,16 +159,16 @@ class OperationBinaryLessorComparisonMatcher(BaseOperatorMatcher):
         self, state: LexerState, previous_match: LexerResult | None
     ) -> LexerResult | None:
         string = state.peek()
-        if previous_match is not None and previous_match in [
+        if previous_match is not None and previous_match.type in [
             LexerType.NUMBER,
             LexerType.IDENTIFIER,
         ]:
             if string[0] == "<":
                 if string[1] == "=":
-                    Logger.info("found: <=")
+                    Logger.trace("found: <=")
                     return LexerResult(LexerType.BINARY_LOGIC, "<=", state)
                 else:
-                    Logger.info("found: <")
+                    Logger.trace("found: <")
                     return LexerResult(LexerType.BINARY_LOGIC, "<", state)
             return None
 
@@ -178,16 +178,16 @@ class OperationBinaryOrMatcher(BaseOperatorMatcher):
         self, state: LexerState, previous_match: LexerResult | None
     ) -> LexerResult | None:
         string = state.peek()
-        if previous_match is not None and previous_match in [
+        if previous_match is not None and previous_match.type in [
             LexerType.NUMBER,
             LexerType.IDENTIFIER,
         ]:
             if string[0] == "|":
                 if string[1] == "|":
-                    Logger.info("found: ||")
+                    Logger.trace("found: ||")
                     return LexerResult(LexerType.BINARY_LOGIC, "||", state)
                 else:
-                    Logger.info("found: |")
+                    Logger.trace("found: |")
                     return LexerResult(LexerType.BINARY_LOGIC, "|", state)
             return None
 
@@ -197,16 +197,16 @@ class OperationBinaryAndMatcher(BaseOperatorMatcher):
         self, state: LexerState, previous_match: LexerResult | None
     ) -> LexerResult | None:
         string = state.peek()
-        if previous_match is not None and previous_match in [
+        if previous_match is not None and previous_match.type in [
             LexerType.NUMBER,
             LexerType.IDENTIFIER,
         ]:
             if string[0] == "&":
                 if string[1] == "&":
-                    Logger.info("found: &&")
+                    Logger.trace("found: &&")
                     return LexerResult(LexerType.BINARY_LOGIC, "&&", state)
                 else:
-                    Logger.info("found: &")
+                    Logger.trace("found: &")
                     return LexerResult(LexerType.BINARY_LOGIC, "&", state)
             return None
 
@@ -217,15 +217,10 @@ class OperationBinaryStringConcatenationMatcher(BaseOperatorMatcher):
     ) -> LexerResult | None:
         string = state.peek()
         if previous_match is not None:
-            Logger.info(f"previous: {previous_match.type}")
-            if previous_match.type in [
-                LexerType.NUMBER,
-                LexerType.IDENTIFIER,
-                LexerType.STRING,
-            ]:
+            if previous_match.type == LexerType.STRING:
                 if string[0] == "+":
-                    Logger.info(f"found: {string[0]}")
-                    return LexerResult(LexerType.BINARY_LOGIC, string[0], state)
+                    Logger.trace(f"found: {string[0]}")
+                    return LexerResult(LexerType.STRING_CONCATENATION, string[0], state)
         return None
 
 
@@ -237,15 +232,14 @@ class OperationTernaryMatcher(BaseOperatorMatcher):
     ) -> LexerResult | None:
         string = state.peek()
         if previous_match is not None:
-            Logger.info(f"previous: {previous_match.type}")
             if previous_match.type in [
                 LexerType.NUMBER,
                 LexerType.IDENTIFIER,
                 LexerType.STRING,
-                LexerType.RESERVED_WORD,
+                LexerType.BOOLEAN_VALUE,
             ]:
                 if string[0] in ["?", ":"]:
-                    Logger.info(f"found: {string[0]}")
+                    Logger.trace(f"found: {string[0]}")
                     return LexerResult(LexerType.TERNARY_LOGIC, string[0], state)
         return None
 
@@ -258,7 +252,7 @@ class OperationCalculationMatcher(BaseMatcher):
         self._matchers.append(OperationUnaryDecrementOperatorMatcher())
         self._matchers.append(OperationUnaryNegationOperatorMatcher())
 
-        self._matchers.append(OperationBinaryOperatorMatcher())
+        self._matchers.append(OperationBinaryMathsOperatorMatcher())
         self._matchers.append(OperationBinaryAssignmentMatcher())
         self._matchers.append(OperationBinaryNegativeComparisonMatcher())
         self._matchers.append(OperationBinaryGreaterComparisonMatcher())
@@ -272,12 +266,12 @@ class OperationCalculationMatcher(BaseMatcher):
     def try_match(
         self, state: LexerState, previous_match: LexerResult | None
     ) -> LexerResult | Error:
-        Logger.info("calulation matcher")
+        Logger.trace("calulation matcher")
         string = state.peek()
         if len(string) > 1:
             for matcher in self._matchers:
                 result = matcher.try_match(state, previous_match)
                 if result is not None:
                     return result
-        Logger.info("not found")
+        Logger.info("calculation matcher: not found")
         return None

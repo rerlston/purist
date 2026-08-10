@@ -4,10 +4,10 @@ Purist Lexer, converts discovered source code values into tokens
 
 from typing import List
 
-from purist.lexer import Lexer
+from purist.lexer.lexer import Lexer
 from purist.models.token import Token, TokenType
 
-from utils.logger import Logger
+from purist.utils.logger import Logger
 
 class Tokenizer():
     """

@@ -11,21 +11,23 @@ PASCAL_CASE_CHARACTERS = r"^[A-Z][a-zA-Z0-9]"
 CAMEL_CASE_CHARACTERS = r"^[a-z][A-Za-z0-9]"
 CONSTANT_CHARACTERS = r"^[A-Z_0-9]+$"
 
+SERVICE_SYNONYMS = r"^(class|service)"
+INTENT_SYNONYMS = r"^(interface|intent|contract|portal)"
+MODEL_SYNONYMS = r"^(type|model)"
+FULFILLS_SYNONYMS = r"^(implements|supports,fulfills|achieves)"
+BEHAVES_LIKE_SYNONYMS = r"^(extends|behavesLike|becomes|adopts)"
+BLUEPRINT_SYNONYMS = r"^(abstract|blueprint|concept|conceptual|theory|theoretical)"
+ENUMERATION_SYNONYMS = r"^(enum|enumeration|values|presets|options|choices)"
+BOOLEANS = r"^(true|false)"
+
 
 class BaseIdentifierMatcher(ABC):
     def __init__(self) -> None:
         self._reserved_words = [
-            "type",
-            "service",
-            "class",
-            "model",
-            "interface",
-            "contract",
-            "portal",
-            "enumeration",
-            "enum",
             "private",
+            "hidden",
             "public",
+            "visible",
             "constructor",
             "destructor",
             "if",
@@ -38,8 +40,6 @@ class BaseIdentifierMatcher(ABC):
             "string",
             "bool",
             "boolean",
-            "true",
-            "false",
             "null",
             "or",
             "and",
@@ -47,21 +47,17 @@ class BaseIdentifierMatcher(ABC):
             "equal",
             "greater",
             "less",
+            "le",
+            "ge",
+            "xor",
             "is",
             "in",
             "self",
             "this",
-            "abstract",
-            "concept",
-            "conceptual",
-            "theory",
-            "theoretical",
             "virtual",
             "import",
             "from",
             "require",
-            "implements",
-            "extends",
             "void",
             "print",
         ]
@@ -73,34 +69,75 @@ class BaseIdentifierMatcher(ABC):
 
 class ReservedKeywordMatcher(BaseIdentifierMatcher):
     def try_match(self, value: str, state: LexerState) -> LexerResult | None:
-        Logger.info("reserved keyword matcher")
+        Logger.trace("reserved keyword matcher")
         if value in self._reserved_words:
-            Logger.info(f"found: {value}")
+            Logger.trace(f"found: {value}")
             return LexerResult(LexerType.RESERVED_WORD, value, state)
+
+        result = re.match(SERVICE_SYNONYMS, value)
+        Logger.trace(f"service match? {result}")
+        if bool(result):
+            return LexerResult(LexerType.SERVICE, value, state)
+
+        result = re.match(INTENT_SYNONYMS, value)
+        Logger.trace(f"intent match? {result}")
+        if bool(result):
+            return LexerResult(LexerType.INTENT, value, state)
+
+        result = re.match(MODEL_SYNONYMS, value)
+        Logger.trace(f"model match? {result}")
+        if bool(result):
+            return LexerResult(LexerType.MODEL, value, state)
+
+        result = re.match(FULFILLS_SYNONYMS, value)
+        Logger.trace(f"fulfills match? {result}")
+        if bool(result):
+            return LexerResult(LexerType.FULFILLS, value, state)
+
+        result = re.match(BEHAVES_LIKE_SYNONYMS, value)
+        Logger.trace(f"behaves like match? {result}")
+        if bool(result):
+            return LexerResult(LexerType.BEHAVES_LIKE, value, state)
+
+        result = re.match(BLUEPRINT_SYNONYMS, value)
+        Logger.trace(f"blueprint match? {result}")
+        if bool(result):
+            return LexerResult(LexerType.BLUEPRINT, value, state)
+
+        result = re.match(ENUMERATION_SYNONYMS, value)
+        Logger.trace(f"enum match? {result}")
+        if bool(result):
+            return LexerResult(LexerType.ENUMERATION, value, state)
+
+        result = re.match(BOOLEANS, value)
+        Logger.trace(f"bool match? {result}")
+        if bool(result):
+            return LexerResult(LexerType.BOOLEAN_VALUE, value, state)
+
         return None
 
 
 class ConstantKeywordMatcher(BaseIdentifierMatcher):
     def try_match(self, value: str, state: LexerState) -> LexerResult | None:
-        Logger.info("constant keyword matcher")
+        Logger.trace("constant keyword matcher")
         result = re.match(CONSTANT_CHARACTERS, value)
         if bool(result):
-            Logger.info(f"found: {value}")
+            Logger.trace(f"found: {value}")
             return LexerResult(LexerType.CONSTANT, value, state)
         return None
 
 
 class IdentifierKeywordMatcher(BaseIdentifierMatcher):
     def try_match(self, value: str, state: LexerState) -> LexerResult | None:
-        Logger.info("reserved keyword matcher")
+        Logger.trace("reserved keyword matcher")
         result = re.match(CAMEL_CASE_CHARACTERS, value)
         if bool(result):
-            Logger.info(f"found: {value}")
+            Logger.trace(f"found: {value}")
             return LexerResult(LexerType.IDENTIFIER, value, state)
 
         result = re.match(PASCAL_CASE_CHARACTERS, value)
         if bool(result):
-            Logger.info(f"found: {value}")
+            Logger.trace(f"found: {value}")
             return LexerResult(LexerType.PASCAL_CASE, value, state)
         return None
 
@@ -115,7 +152,7 @@ class WordMatcher(BaseMatcher):
     def try_match(
         self, state: LexerState, previous_match: LexerResult | None
     ) -> LexerResult | Error:
-        Logger.info("word matcher")
+        Logger.trace("word matcher")
         word = ""
         character, new_line = state.next_character()
         if character.isalpha():
@@ -123,11 +160,11 @@ class WordMatcher(BaseMatcher):
                 word += character
                 character, new_line = state.next_character()
         if len(word) == 0:
-            Logger.info("not found")
+            Logger.trace("not found")
             return None
         for matcher in self._matchers:
             result = matcher.try_match(word, state)
             if result is not None:
                 return result
-        Logger.info("not found")
+        Logger.info("word matcher: not found")
         return LexerResult(LexerType.UNKNOWN, word, state)

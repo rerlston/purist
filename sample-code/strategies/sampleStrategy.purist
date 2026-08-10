@@ -1,5 +1,7 @@
 from ..sampleType require [MyCustomType]
 
-public interface SampleStrategy {
-	public process(MyCustomType value) void
+interface ISampleStrategy {
+	integer process(MyCustomType value)
+	// or
+	integer process(MyCustomType value)
 }

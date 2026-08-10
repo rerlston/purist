@@ -2,6 +2,8 @@ language called purist unless already exists
 
 *** The purist language only allowing standards that are normally enforced in code reviews ***
 
+purist to prevent architectural drift while offering flexible syntactical sugar (class or service, interface or intent, type or model, implements or fulfills, == or eq, < or lt, etc)
+
 Build AST as binary tree, node, with single left and optional single right. Traverse in order
 
 A tokenizer breaks a stream of text into tokens, usually by looking for whitespace (tabs, spaces, new lines). - decoder
@@ -18,7 +20,7 @@ Classes/Services names, interfaces/ports names and types/models names are Pascal
 Method names and variable names are camel case with the first letter lower case, only a-z/A-Z and 0-9 allowed
 Constants are all upper case, only A-Z, underscore and 0-9 allowed. Constants as attributes are automatically public static and unmodifiable, are accessible outside of the class Constants inside of methods are only visible inside of the scope of the method. Constants must be initialised when defined, can be a built-in type or custom type, or can be a class type in a method (not in an attribute) using new which then supports mocking in unit tests (factory of factory pattern: normal runtime factory, unit test factory)
 
-use AST to determine cycloatic complexity score of method, report warnings and errors for medium to high complexity methods
+use AST to determine cyclomatic complexity score of method, report warnings and errors for medium to high complexity methods
 
 No round brackets in while or for-loops
 Use of "in and of" for loops
@@ -191,22 +193,22 @@ model Account {
 possible project structure:
 <project-root>/
     /listeners              // application input managers (when layer)
-        /models             // entry point models (rest request/response, message queue payload definitions, etc)
+        /listener-models    // entry point models (rest request/response, message queue payload definitions, etc)
     /logic                  // business layer (what layer)
-    /models                 // domain models for entry point and infrastructure services to communicate with the business layer
-    /interfaces             // interfaces/ports for business to call and infrastructure services to implement, or for infrastructure to call the listeners
+    /domain-models          // domain models for entry point and infrastructure services to communicate with the business layer
+    /interfaces             // interfaces/ports for business to call and infrastructure services to implement
     /infrastructure         // (how layer)
         /respositories      // db code
             /entities       // db models
         /services           // non repository services
-            /models         // non repository service models
+            /service-models // non repository service models
     /tests
         /listeners
         /logic
         /interfaces
             /repositories
             /services
-    <app-name.purist>       // main application entry point that implements EntryPoint interface/port) this sets up the application config and prepares listeners, listeners are setup for an callbacks from infrastructure
+    <app-name.purist>       // main application entry point that implements EntryPoint (interface/port) this sets up the application config and prepares listeners
 
 listeners call logic/business layer or infrastructure/services services not infrastructure/repositories
 logic/business can call infrastructure only

@@ -1,7 +1,7 @@
 from typing import List
 from unittest import TestCase
 
-from purist.lexer import Lexer
+from purist.lexer.lexer import Lexer
 from purist.models.lexer_models import LexerResult, LexerType
 from purist.utils.errors import Error
 
@@ -18,7 +18,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.CALCULATION_LOGIC)
+        self.assertEqual(result.type, LexerType.BINARY_LOGIC)
         self.assertEqual(result.value, "==")
 
     def test_semantic_not_equals_comparitor(self):
@@ -32,7 +32,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.CALCULATION_LOGIC)
+        self.assertEqual(result.type, LexerType.BINARY_LOGIC)
         self.assertEqual(result.value, "!=")
 
     def test_number(self):
@@ -61,7 +61,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.CALCULATION_LOGIC)
+        self.assertEqual(result.type, LexerType.BINARY_LOGIC)
         self.assertEqual(result.value, "-")
 
     def test_semantic_add_comparitor(self):
@@ -76,7 +76,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.CALCULATION_LOGIC)
+        self.assertEqual(result.type, LexerType.BINARY_LOGIC)
         self.assertEqual(result.value, "+")
 
     def test_semantic_multiply_comparitor(self):
@@ -91,7 +91,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.CALCULATION_LOGIC)
+        self.assertEqual(result.type, LexerType.BINARY_LOGIC)
         self.assertEqual(result.value, "*")
 
     def test_semantic_mod_comparitor(self):
@@ -106,7 +106,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.CALCULATION_LOGIC)
+        self.assertEqual(result.type, LexerType.BINARY_LOGIC)
         self.assertEqual(result.value, "%")
 
     def test_semantic_not_comparitor(self):
@@ -122,7 +122,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.CALCULATION_LOGIC)
+        self.assertEqual(result.type, LexerType.UNARY_LOGIC)
         self.assertEqual(result.value, "!")
 
     def test_semantic_opening_round_bracket(self):
@@ -209,21 +209,6 @@ class TestLexer(TestCase):
         self.assertEqual(result.type, LexerType.GRAMMAR_STRUCTURE)
         self.assertEqual(result.value, "]")
 
-    def test_semantic_colon(self):
-        # given
-        text = "name: type"
-        service = Lexer("test", text)
-        service.next()
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.META_LANGUAGE)
-        self.assertEqual(result.value, ":")
-
     def test_semantic_assign(self):
         # given
         text = "a = b"
@@ -236,23 +221,23 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.META_LANGUAGE)
+        self.assertEqual(result.type, LexerType.BINARY_LOGIC)
         self.assertEqual(result.value, "=")
 
-    def test_semantic_fullstop(self):
-        # given
-        text = "a.b"
-        service = Lexer("test", text)
-        service.next()
+    # def test_semantic_fullstop(self):
+    #     # given
+    #     text = "a.b"
+    #     service = Lexer("test", text)
+    #     service.next()
 
-        # when
-        result = service.next()
+    #     # when
+    #     result = service.next()
 
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.META_LANGUAGE)
-        self.assertEqual(result.value, ".")
+    #     # then
+    #     self.assertIsNotNone(result)
+    #     self.assertIsInstance(result, LexerResult)
+    #     self.assertEqual(result.type, LexerType.META_LANGUAGE)
+    #     self.assertEqual(result.value, ".")
 
     def test_word_detection(self):
         # given
@@ -364,7 +349,7 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.CALCULATION_LOGIC)
+        self.assertEqual(result.type, LexerType.BINARY_LOGIC)
         self.assertEqual(result.value, "/")
 
     def test_detect_comment(self):

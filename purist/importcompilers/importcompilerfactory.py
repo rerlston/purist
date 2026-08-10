@@ -1,7 +1,7 @@
 from typing import Dict
 
 from purist.models.token import Token, TokenType
-from utils.logger import Logger
+from purist.utils.logger import Logger
 
 class ImportCompilerFactory:
     __import_managers: Dict[TokenType, str] = {

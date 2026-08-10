@@ -1,19 +1,26 @@
-from Builtin.utilities.logger require [Logger]
-from Builtin.state require [Stateless]
+from Builtin.utilities.logger require [ILogger]
+from Builtin.state require [IStateless]
 
-from strategies.sampleInstanceStrategy require [SampleInstanceStrategy]
+from strategies.sampleStrategy require [ISampleStrategy]
+from strategies.sampleFactory require [ISampledStrategyFactory]
 from sampleType require [MyCustomType]
 from sampleEnum require [MyCustomEnum]
 
 // despite having a stateful attribute the class implements the Stateless interface
 // which means a single instance exists but with a shared state
 // changing the state's values will affect the other classes with the same dependency
-class SampleBusiness implements Stateless {
-	Logger logging
+class SampleBusiness implements IStateless {
+	ILogger logger
+	ISampleStrategyFactory sampleFactory
 	MyCustomType myType
 
-	public process(string variable) integer {
-		logging.info("SampleBusiness.process called")
+	constructor(ISampleFactory factory, ILogger logger) {
+		this.sampleFactory = factory
+		this.logger = logger
+	}
+
+	public integer process(MyCustomType value) {
+		logger.info("SampleBusiness.process called")
 
 		this.myType = new MyCustomType(
 			name="Firstname",
@@ -21,9 +28,40 @@ class SampleBusiness implements Stateless {
 			dateOfBirth="2020/01/01 00:00:00"
 		)
 
-		SampleStrategy myStrategy = new Strategy(variable)
+		SampleStrategy myStrategy = this.sampleFactory.getStrategy(value)
 		if myStrategy != null {
-			myStrategy.process(myType)
+			result = myStrategy.process(this.myType)
+			return result
+		}
+
+		return 0
+	}
+}
+
+// similar syntax
+service SampleBusiness fulfills Stateless {
+	ILogger logger
+	ISampleStrategyFactory sampleFactory
+	MyCustomType myType
+
+	constructor(ISampleFactory factory, ILogger logger) {
+		this.sampleFactory = factory
+		this.logger = logger
+	}
+
+	visible integer process(MyCustomType value) {
+		logger.info("SampleBusiness.process called")
+
+		this.myType = new MyCustomType(
+			name="Firstname",
+			surname="Family-Name",
+			dateOfBirth="2020/01/01 00:00:00"
+		)
+
+		SampleStrategy myStrategy = this.sampleFactory.getStrategy(value)
+		if myStrategy ne null {
+			result = myStrategy.process(this.myType)
+			return result
 		}
 
 		return 0
