@@ -1,20 +1,20 @@
 from purist.lexer.base_matcher import BaseMatcher
 from purist.models.lexer_models import LexerResult, LexerState, LexerType
-from purist.utils.errors import Error
 from purist.utils.logger import Logger
 
 
 class StringMatcher(BaseMatcher):
+
     def try_match(
         self, state: LexerState, previous_match: LexerResult | None
-    ) -> LexerResult | Error:
-        Logger.info("string matcher")
+    ) -> LexerResult | None:
+        Logger.trace("string matcher")
         string = ""
         character, new_line = state.next_character()
         next_character, new_line = state.next_character()
         if character is not None and next_character is not None:
             if character == "\\":
-                Logger.info(
+                Logger.trace(
                     "double quoted string in python with escaped double quotes value found"
                 )
                 while (
@@ -43,10 +43,10 @@ class StringMatcher(BaseMatcher):
                     character, new_line = state.next_character()
                 string += '"'
         if len(string) > 0 and string[-1] != '"':
-            Logger.info("not found")
+            Logger.trace("not found")
             return None
         if len(string) == 0:
-            Logger.info("not found")
+            Logger.trace("not found")
             return None
-        Logger.info(f"found: {string}")
-        return LexerResult(LexerType.STRING, string, state)
+        Logger.trace(f"found: {string}")
+        return LexerResult(LexerType.STRING_LITERAL, string, state)

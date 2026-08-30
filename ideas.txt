@@ -4,7 +4,7 @@ language called purist unless already exists
 
 purist to prevent architectural drift while offering flexible syntactical sugar (class or service, interface or intent, type or model, implements or fulfills, == or eq, < or lt, etc)
 
-Build AST as binary tree, node, with single left and optional single right. Traverse in order
+Build AST as binary tree, node, with single left and optional single right. Traverse in order, use Pratt Parser's Top-Down Operator Precedence
 
 A tokenizer breaks a stream of text into tokens, usually by looking for whitespace (tabs, spaces, new lines). - decoder
 
@@ -166,8 +166,8 @@ All strings literals only support double quote surrounding the string literal, v
 
 1. Create lexer
 2. Create Tokenzier
-3. Create AST (abstract syntax tree)
-4. Create interpreter/compiler/llvm mapper
+3. Create AST (abstract syntax tree) using Pratt parser techniques
+4. Create interpreter/compiler/llvm mapper (LLVM IR)
 
 Look into Rust's memory safety and no need for manual developer requested memory management and garbage collection
 

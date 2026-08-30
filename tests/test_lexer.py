@@ -1,16 +1,23 @@
-from typing import List
 from unittest import TestCase
+from unittest.mock import MagicMock
 
 from purist.lexer.lexer import Lexer
-from purist.models.lexer_models import LexerResult, LexerType
-from purist.utils.errors import Error
+from purist.models.lexer_models import LexerResult, LexerType, LexerState
+from purist.utils.errors import Error, InvalidSyntaxError
+from purist.utils.logger import Logger, LogLevel
 
 
 class TestLexer(TestCase):
-    def test_semantic_equals_comparitor(self):
+
+    def setUp(self):
+        Logger.configure(log_level=LogLevel.INFO)
+        self._mocked_state = MagicMock()
+
+    def test_eof(self):
         # given
-        text = "=="
-        service = Lexer("test", text)
+        self._mocked_state.return_value.is_eof.return_value = True
+        matchers = []
+        service = Lexer(matchers, self._mocked_state)
 
         # when
         result = service.next()
@@ -18,13 +25,13 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.BINARY_LOGIC)
-        self.assertEqual(result.value, "==")
+        self.assertEqual(result.type, LexerType.EOF)
 
-    def test_semantic_not_equals_comparitor(self):
+    def test_second_eof(self):
         # given
-        text = "!="
-        service = Lexer("test", text)
+        self._mocked_state.is_eof.side_effect = [False, True]
+        matchers = []
+        service = Lexer(matchers, self._mocked_state)
 
         # when
         result = service.next()
@@ -32,403 +39,155 @@ class TestLexer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.BINARY_LOGIC)
-        self.assertEqual(result.value, "!=")
+        self.assertEqual(result.type, LexerType.EOF)
 
-    def test_number(self):
+    def test_find_largest_matcher(self):
         # given
-        text = "1234"
-        service = Lexer("test", text)
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.NUMBER)
-        self.assertEqual(result.value, "1234")
-
-    def test_semantic_subtract_comparitor(self):
-        # given
-        text = "10 - 3"
-        service = Lexer("test", text)
-        service.next()
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.BINARY_LOGIC)
-        self.assertEqual(result.value, "-")
-
-    def test_semantic_add_comparitor(self):
-        # given
-        text = "3+5"
-        service = Lexer("test", text)
-        service.next()  # move past the number
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.BINARY_LOGIC)
-        self.assertEqual(result.value, "+")
-
-    def test_semantic_multiply_comparitor(self):
-        # given
-        text = "5* 6"
-        service = Lexer("test", text)
-        service.next()  # skip over first toke (numbr)
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.BINARY_LOGIC)
-        self.assertEqual(result.value, "*")
-
-    def test_semantic_mod_comparitor(self):
-        # given
-        text = "1 %2"
-        service = Lexer("test", text)
-        service.next()
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.BINARY_LOGIC)
-        self.assertEqual(result.value, "%")
-
-    def test_semantic_not_comparitor(self):
-        # given
-        text = "a = !b"
-        service = Lexer("test", text)
-        service.next()  # skip over identifier
-        service.next()  # skip over operator
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.UNARY_LOGIC)
-        self.assertEqual(result.value, "!")
-
-    def test_semantic_opening_round_bracket(self):
-        # given
-        text = "("
-        service = Lexer("test", text)
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.GRAMMAR_STRUCTURE)
-        self.assertEqual(result.value, "(")
-
-    def test_semantic_closing_round_bracket(self):
-        # given
-        text = ")"
-        service = Lexer("test", text)
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.GRAMMAR_STRUCTURE)
-        self.assertEqual(result.value, ")")
-
-    def test_semantic_opening_curly_bracket(self):
-        # given
-        text = "{"
-        service = Lexer("test", text)
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.GRAMMAR_STRUCTURE)
-        self.assertEqual(result.value, "{")
-
-    def test_semantic_closing_curly_bracket(self):
-        # given
-        text = "}"
-        service = Lexer("test", text)
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.GRAMMAR_STRUCTURE)
-        self.assertEqual(result.value, "}")
-
-    def test_semantic_opening_square_bracket(self):
-        # given
-        text = "["
-        service = Lexer("test", text)
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.GRAMMAR_STRUCTURE)
-        self.assertEqual(result.value, "[")
-
-    def test_semantic_closing_square_bracket(self):
-        # given
-        text = "]"
-        service = Lexer("test", text)
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.GRAMMAR_STRUCTURE)
-        self.assertEqual(result.value, "]")
-
-    def test_semantic_assign(self):
-        # given
-        text = "a = b"
-        service = Lexer("test", text)
-        service.next()
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.BINARY_LOGIC)
-        self.assertEqual(result.value, "=")
-
-    # def test_semantic_fullstop(self):
-    #     # given
-    #     text = "a.b"
-    #     service = Lexer("test", text)
-    #     service.next()
-
-    #     # when
-    #     result = service.next()
-
-    #     # then
-    #     self.assertIsNotNone(result)
-    #     self.assertIsInstance(result, LexerResult)
-    #     self.assertEqual(result.type, LexerType.META_LANGUAGE)
-    #     self.assertEqual(result.value, ".")
-
-    def test_word_detection(self):
-        # given
-        text = "Hello other stuff"
-        service = Lexer("test", text)
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertEqual(result.type, LexerType.IDENTIFIER)
-        self.assertEqual(result.value, "Hello")
-        state = result.state
-        self.assertEqual(state.line, 0, "line should be 0")
-        self.assertEqual(state.column, 6, "column should be 0")
-
-    def test_positive_number_detection(self):
-        # given
-        text = "123 other stuff"
-        service = Lexer("test", text)
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.NUMBER)
-        self.assertEqual(result.value, "123")
-
-    def test_negative_integer_detection(self):
-        # given
-        text = "-123 other stuff"
-        service = Lexer("test", text)
-
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.NUMBER)
-        self.assertEqual(result.value, "-123")
-
-    def test_decimal_detection(self):
-        # given
-        text = "123.456 other stuff"
-        service = Lexer("test", text)
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.NUMBER)
-        self.assertEqual(result.value, "123.456")
-
-    def test_negative_decimal_detection(self):
-        # given
-        text = "-123.456 other stuff"
-        service = Lexer("test", text)
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.NUMBER)
-        self.assertEqual(result.value, "-123.456")
-
-    def test_detect_quoted_string(self):
-        # given
-        text = '"Hello" other stuff'
-        service = Lexer("test", text)
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertEqual(result.value, '"Hello"')
-        self.assertEqual(result.type, LexerType.STRING)
-
-    def test_detect_quoted_string_with_escaped_quote(self):
-        # given
-        text = 'quoted "this is the quoted string" other stuff'
-        service = Lexer("test", text)
-        service.next()
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.STRING)
-        self.assertEqual(result.value, '"this is the quoted string"')
-
-    def test_semantic_divide_comparitor(self):
-        # given
-        text = "1 / 2"
-        service = Lexer("test", text)
-        service.next()
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.BINARY_LOGIC)
-        self.assertEqual(result.value, "/")
-
-    def test_detect_comment(self):
-        # given
-        text = "// Hello World"
-        service = Lexer("test", text)
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertEqual(result.type, LexerType.COMMENT)
-        self.assertEqual(result.value, "// Hello World")
-
-    def test_detect_comment_after_identifier(self):
-        # given
-        text = "identifier // comment"
-        service = Lexer("test", text)
-        service.next()
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertEqual(result.type, LexerType.COMMENT)
-        self.assertEqual(result.value, "// comment")
-
-    def test_detect_comment2(self):
-        # given
-        text = "// Hello World\nnot a comment line"
-        service = Lexer("test", text)
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertEqual(result.type, LexerType.COMMENT)
-        self.assertEqual(result.value, "// Hello World")
-
-    def test_multi_line_string(self):
-        # given
-        text = '"Hello\nWorld"'
-        service = Lexer("test", text)
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertEqual(result.type, LexerType.STRING)
-        self.assertEqual(result.value, '"Hello\nWorld"')
-
-    def test_invalid_decimal(self):
-        # given
-        text = "123.456.789 other stuff"
-        service = Lexer("test", text)
-
-        # when
-        result = service.next()
-
-        # then
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, Error)
-        self.assertEqual(
-            result.error,
-            "Invalid Syntax Error: 123.456.789 other stu file: test, line: 1, column: 1\r\n                      ^",
+        self._mocked_state.is_eof.return_value = False
+        matchers = []
+        mocked_matcher = MagicMock()
+        mocked_matcher.try_match.return_value = LexerResult(
+            LexerType.ADDITION, "+", self._mocked_state
         )
-
-    def test_decode_error(self):
-        # given
-        text = "$$$"
-        service = Lexer("test", text)
+        matchers.append(mocked_matcher)
+        service = Lexer(matchers, self._mocked_state)
 
         # when
         result = service.next()
 
         # then
         self.assertIsNotNone(result)
-        self.assertIsInstance(result, Error)
-        self.assertEqual(
-            result.error,
-            "Invalid Syntax Error: $$ file: test, line: 1, column: 1\r\n                      ^",
-        )
+        self.assertIsInstance(result, LexerResult)
+        self.assertEqual(result.type, LexerType.ADDITION)
+
+    def test_find_largest_matcher_fails_with_syntax_error(self):
+        # given
+        self._mocked_state.is_eof.return_value = False
+        matchers = []
+        service = Lexer(matchers, self._mocked_state)
+
+        # when
+        result = service.next()
+
+        # then
+        self.assertIsNotNone(result)
+        self.assertIsInstance(result, InvalidSyntaxError)
+
+    def test_list_tokens(self):
+        # given
+        text = """
+        service Abc123{
+            constructor(){}
+            public void method(){}
+        }"""
+        state = LexerState("test", text)
+        service = Lexer(Lexer.setup(), state)
+
+        # when
+        service_token = service.next()
+        identifier_token_1 = service.next()
+        left_curly_token_1 = service.next()
+        constructor_token = service.next()
+        left_round_token_1 = service.next()
+        right_round_token_1 = service.next()
+        left_curly_token_2 = service.next()
+        right_curly_token_1 = service.next()
+        public_token = service.next()
+        void_token = service.next()
+        identifier_token_2 = service.next()
+        left_round_token_2 = service.next()
+        right_round_token_2 = service.next()
+        left_curly_token_3 = service.next()
+        right_curly_token_2 = service.next()
+        right_curly_token_3 = service.next()
+
+        # then
+        # service
+        self.assertIsInstance(service_token, LexerResult)
+        self.assertEqual(service_token.type, LexerType.SERVICE)
+
+        # Abc123
+        self.assertIsInstance(identifier_token_1, LexerResult)
+        self.assertEqual(identifier_token_1.type, LexerType.IDENTIFIER)
+
+        # { 1
+        self.assertIsInstance(left_curly_token_1, LexerResult)
+        self.assertEqual(left_curly_token_1.type, LexerType.L_CURLY)
+
+        # constructor
+        self.assertIsInstance(constructor_token, LexerResult)
+        self.assertEqual(constructor_token.type, LexerType.CONSTRUCTOR)
+
+        # ( 1
+        self.assertIsInstance(left_round_token_1, LexerResult)
+        self.assertEqual(left_round_token_1.type, LexerType.L_ROUND)
+
+        # ) 1
+        self.assertIsInstance(right_round_token_1, LexerResult)
+        self.assertEqual(right_round_token_1.type, LexerType.R_ROUND)
+
+        # { 2
+        self.assertIsInstance(left_curly_token_2, LexerResult)
+        self.assertEqual(left_curly_token_2.type, LexerType.L_CURLY)
+
+        # } 2
+        self.assertIsInstance(right_curly_token_1, LexerResult)
+        self.assertEqual(right_curly_token_1.type, LexerType.R_CURLY)
+
+        # public
+        self.assertIsInstance(public_token, LexerResult)
+        self.assertEqual(public_token.type, LexerType.PUBLIC)
+
+        # void
+        self.assertIsInstance(void_token, LexerResult)
+        self.assertEqual(void_token.type, LexerType.VOID)
+
+        # method
+        self.assertIsInstance(identifier_token_2, LexerResult)
+        self.assertEqual(identifier_token_2.type, LexerType.IDENTIFIER)
+
+        # ( 2
+        self.assertIsInstance(left_round_token_2, LexerResult)
+        self.assertEqual(left_round_token_2.type, LexerType.L_ROUND)
+
+        # ) 2
+        self.assertIsInstance(right_round_token_2, LexerResult)
+        self.assertEqual(right_round_token_2.type, LexerType.R_ROUND)
+
+        # { 3
+        self.assertIsInstance(left_curly_token_3, LexerResult)
+        self.assertEqual(left_curly_token_3.type, LexerType.L_CURLY)
+
+        # } 2
+        self.assertIsInstance(right_curly_token_2, LexerResult)
+        self.assertEqual(right_curly_token_2.type, LexerType.R_CURLY)
+
+        # } 3
+        self.assertIsInstance(right_curly_token_3, LexerResult)
+        self.assertEqual(right_curly_token_3.type, LexerType.R_CURLY)
+
+        service.next()
+
+    def test_test_first_character(self):
+        # given
+        text = """
+        // this is a simple class extending another class
+
+class AnotherClass {
+    // no defined methods
+}
+
+class SimpleClass extends AnotherClass {
+}
+        """
+        state = LexerState("test", text)
+        service = Lexer(Lexer.setup(), state)
+
+        # when
+        service.next()
+        class_token = service.next()
+        Logger.info(class_token)
+
+        # then
+        self.assertIsInstance(class_token, LexerResult)
+        self.assertEqual(class_token.type, LexerType.SERVICE)

@@ -1,10 +1,11 @@
-from Builtin.utilities.logger require [Logger]
+from Builtin.utilities.logger require [ILogger, LoggerEnum]
 
 class SimpleClass {
-	Logger logger
+	ILogger logger
 
-	constructor() {
-		this.logger = new Logger()
+	constructor(ILogger logger) {
+		this.logger = logger
+		this.logger.setLevel(LoggerEnum.info)
 	}
 
 	public myMethod() void {

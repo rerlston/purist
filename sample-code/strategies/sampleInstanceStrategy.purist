@@ -7,12 +7,12 @@ from sampleType require [MyCustomType]
 // there is no stateful attribute so the Stateless implementation is already implied
 class SampleInstanceStrategy extends Strategy implements SampleStrategy, Stateless {
 	// attributes are always private
-	Logger logging
+	ILogger logging
 
 	// constructors are always public
-	constructor() {
+	constructor(ILogger logger) {
 		super("a123")
-		this.logging = new Logger()
+		this.logging = logger
 	}
 
 	// method from SampleStrategy, default is public, can specify private or public
