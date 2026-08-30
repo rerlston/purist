@@ -1,5 +1,5 @@
 from purist.lexer.base_matcher import BaseMatcher
-from purist.models.lexer_models import LexerResult, LexerState, LexerType
+from purist.models.lexer_models import LexerResult, LexerState, TokenType
 from purist.utils.logger import Logger
 
 
@@ -28,4 +28,4 @@ class CommentMatcher(BaseMatcher):
             Logger.trace("not found")
             return None
         Logger.trace(f"found: {comment}")
-        return LexerResult(LexerType.COMMENT, comment, state)
+        return LexerResult(TokenType.COMMENT, comment, state)

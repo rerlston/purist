@@ -1,22 +1,22 @@
 from typing import Dict
 
 from purist.lexer.base_matcher import BaseMatcher
-from purist.models.lexer_models import LexerResult, LexerState, LexerType
+from purist.models.lexer_models import LexerResult, LexerState, TokenType
 from purist.utils.logger import Logger
 
 
 class OperationBracketMatcher(BaseMatcher):
 
     def __init__(self) -> None:
-        self.BRACKETS: Dict[str, LexerType] = {
-            "(": LexerType.L_ROUND,
-            ")": LexerType.R_ROUND,
-            "[": LexerType.L_SQUARE,
-            "]": LexerType.R_SQUARE,
-            "{": LexerType.L_CURLY,
-            "}": LexerType.R_CURLY,
-            "<": LexerType.L_ANGLE,
-            ">": LexerType.R_ANGLE,
+        self.BRACKETS: Dict[str, TokenType] = {
+            "(": TokenType.L_ROUND,
+            ")": TokenType.R_ROUND,
+            "[": TokenType.L_SQUARE,
+            "]": TokenType.R_SQUARE,
+            "{": TokenType.L_CURLY,
+            "}": TokenType.R_CURLY,
+            "<": TokenType.L_ANGLE,
+            ">": TokenType.R_ANGLE,
         }
 
     def try_match(

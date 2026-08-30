@@ -2,7 +2,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock
 
 from purist.lexer.comment_matcher import CommentMatcher
-from purist.models.lexer_models import LexerResult, LexerType
+from purist.models.lexer_models import LexerResult, TokenType
 from purist.utils.logger import Logger, LogLevel
 
 
@@ -36,7 +36,7 @@ class TestCommentMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.COMMENT)
+        self.assertEqual(result.type, TokenType.COMMENT)
         self.assertEqual(result.value, "// comment")
         self._mocked_state.next_character.assert_called()
 

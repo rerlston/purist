@@ -2,7 +2,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock, PropertyMock
 
 from purist.lexer.operation_meta_language_matcher import OperationMetaLanguageMatcher
-from purist.models.lexer_models import LexerResult, LexerType
+from purist.models.lexer_models import LexerResult, TokenType
 from purist.utils.logger import Logger, LogLevel
 
 
@@ -27,7 +27,7 @@ class TestMetaLanguageMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.PERIOD)
+        self.assertEqual(result.type, TokenType.PERIOD)
         self.assertEqual(result.value, ".")
         self._mocked_state.next_character.assert_called_once()
 

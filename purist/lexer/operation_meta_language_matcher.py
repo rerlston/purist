@@ -1,19 +1,19 @@
 from typing import Dict
 
 from purist.lexer.base_matcher import BaseMatcher
-from purist.models.lexer_models import LexerResult, LexerState, LexerType
+from purist.models.lexer_models import LexerResult, LexerState, TokenType
 from purist.utils.logger import Logger
 
 
 class OperationMetaLanguageMatcher(BaseMatcher):
 
     def __init__(self) -> None:
-        self.SPECIAL_CHARACTERS: Dict[str, LexerType] = {
-            ".": LexerType.PERIOD,
-            "@": LexerType.AT,
-            "/": LexerType.PATH_SEPARATOR,
-            ",": LexerType.COMMA,
-            ":": LexerType.COLON,
+        self.SPECIAL_CHARACTERS: Dict[str, TokenType] = {
+            ".": TokenType.PERIOD,
+            "@": TokenType.AT,
+            "/": TokenType.PATH_SEPARATOR,
+            ",": TokenType.COMMA,
+            ":": TokenType.COLON,
         }
 
     def try_match(

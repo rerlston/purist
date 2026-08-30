@@ -2,7 +2,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock
 
 from purist.lexer.operation_bracket_matcher import OperationBracketMatcher
-from purist.models.lexer_models import LexerResult, LexerType
+from purist.models.lexer_models import LexerResult, TokenType
 from purist.utils.logger import Logger, LogLevel
 
 
@@ -24,7 +24,7 @@ class TestBracketMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.L_ROUND)
+        self.assertEqual(result.type, TokenType.L_ROUND)
         self.assertEqual(result.value, "(")
         self._mocked_state.next_character.assert_called()
 
@@ -40,7 +40,7 @@ class TestBracketMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.R_ROUND)
+        self.assertEqual(result.type, TokenType.R_ROUND)
         self.assertEqual(result.value, ")")
         self._mocked_state.next_character.assert_called()
 
@@ -56,7 +56,7 @@ class TestBracketMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.L_SQUARE)
+        self.assertEqual(result.type, TokenType.L_SQUARE)
         self.assertEqual(result.value, "[")
         self._mocked_state.next_character.assert_called()
 
@@ -72,7 +72,7 @@ class TestBracketMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.R_SQUARE)
+        self.assertEqual(result.type, TokenType.R_SQUARE)
         self.assertEqual(result.value, "]")
         self._mocked_state.next_character.assert_called()
 
@@ -88,7 +88,7 @@ class TestBracketMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.L_CURLY)
+        self.assertEqual(result.type, TokenType.L_CURLY)
         self.assertEqual(result.value, "{")
         self._mocked_state.next_character.assert_called()
 
@@ -104,7 +104,7 @@ class TestBracketMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.R_CURLY)
+        self.assertEqual(result.type, TokenType.R_CURLY)
         self.assertEqual(result.value, "}")
         self._mocked_state.next_character.assert_called()
 

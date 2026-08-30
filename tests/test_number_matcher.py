@@ -2,7 +2,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock
 
 from purist.lexer.number_matcher import NumberMatcher
-from purist.models.lexer_models import LexerResult, LexerType
+from purist.models.lexer_models import LexerResult, TokenType
 from purist.utils.logger import Logger, LogLevel
 
 
@@ -36,7 +36,7 @@ class TestBracketMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.NUMBER_LITERAL)
+        self.assertEqual(result.type, TokenType.NUMBER_LITERAL)
         self.assertEqual(result.value, "1234567890")
         self._mocked_state.next_character.assert_called()
 
@@ -63,7 +63,7 @@ class TestBracketMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.NUMBER_LITERAL)
+        self.assertEqual(result.type, TokenType.NUMBER_LITERAL)
         self.assertEqual(result.value, "1234567890")
         self._mocked_state.next_character.assert_called()
 
@@ -92,6 +92,6 @@ class TestBracketMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.FLOAT_LITERAL)
+        self.assertEqual(result.type, TokenType.FLOAT_LITERAL)
         self.assertEqual(result.value, "123.4567890")
         self._mocked_state.next_character.assert_called()

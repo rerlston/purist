@@ -2,7 +2,7 @@ from typing import List
 from unittest import TestCase
 
 from purist.lexer.tokenizer import Tokenizer
-from purist.models.lexer_models import LexerResult, LexerState, LexerType
+from purist.models.lexer_models import LexerResult, LexerState, TokenType
 from purist.utils.errors import Error
 from purist.utils.logger import Logger, LogLevel
 

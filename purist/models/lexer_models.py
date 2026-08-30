@@ -110,7 +110,7 @@ class LexerState:
         return output
 
 
-class LexerType(IntEnum):
+class TokenType(IntEnum):
     STRING_LITERAL = 0
     COMMENT = 1
     LOGICAL_NOT = 2
@@ -195,13 +195,14 @@ class LexerType(IntEnum):
     UNKNOWN = 100
 
     def __str__(self) -> str:
-        output = f"LexerType<{self.name}>"
+        output = f"TokenType<{self.name}>"
         return output
 
 
 class LexerResult:
+
     def __init__(
-        self, lexer_type: LexerType, value: str | None, state: LexerState
+        self, lexer_type: TokenType, value: str | None, state: LexerState
     ) -> None:
         self._lexer_type = lexer_type
         self._value = value
@@ -212,7 +213,7 @@ class LexerResult:
         return self._value
 
     @property
-    def type(self) -> LexerType:
+    def type(self) -> TokenType:
         return self._lexer_type
 
     @property

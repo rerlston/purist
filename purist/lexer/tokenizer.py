@@ -13,7 +13,7 @@ from purist.lexer.operation_bracket_matcher import OperationBracketMatcher
 from purist.lexer.operation_meta_language_matcher import OperationMetaLanguageMatcher
 from purist.lexer.string_matcher import StringMatcher
 from purist.lexer.word_matcher import WordMatcher
-from purist.models.lexer_models import LexerResult, LexerState, LexerType
+from purist.models.lexer_models import LexerResult, LexerState, TokenType
 from purist.utils.errors import Error, InvalidSyntaxError
 from purist.utils.logger import Logger
 
@@ -109,7 +109,7 @@ class Tokenizer:
                 return response
 
         if self._state.is_eof():
-            return LexerResult(LexerType.EOF, "", self._state)
+            return LexerResult(TokenType.EOF, "", self._state)
 
         return InvalidSyntaxError(self._state.peek_next_character(), self._state)
 

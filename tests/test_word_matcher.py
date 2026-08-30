@@ -7,7 +7,7 @@ from purist.lexer.word_matcher import (
     ReservedKeywordMatcher,
     WordMatcher,
 )
-from purist.models.lexer_models import LexerResult, LexerType
+from purist.models.lexer_models import LexerResult, TokenType
 from purist.utils.logger import Logger, LogLevel
 
 
@@ -28,7 +28,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.MODEL)
+        self.assertEqual(result.type, TokenType.MODEL)
 
     def test_reserved_service_word(self):
         # given
@@ -42,7 +42,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.SERVICE)
+        self.assertEqual(result.type, TokenType.SERVICE)
 
     def test_reserved_class_word(self):
         # given
@@ -56,7 +56,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.SERVICE)
+        self.assertEqual(result.type, TokenType.SERVICE)
 
     def test_reserved_nodel_word(self):
         # given
@@ -70,7 +70,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.MODEL)
+        self.assertEqual(result.type, TokenType.MODEL)
 
     def test_reserved_interface_word(self):
         # given
@@ -84,7 +84,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.INTENT)
+        self.assertEqual(result.type, TokenType.INTENT)
 
     def test_reserved_contract_word(self):
         # given
@@ -98,7 +98,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.INTENT)
+        self.assertEqual(result.type, TokenType.INTENT)
 
     def test_reserved_portal_word(self):
         # given
@@ -112,7 +112,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.INTENT)
+        self.assertEqual(result.type, TokenType.INTENT)
 
     def test_reserved_enumeration_word(self):
         # given
@@ -126,7 +126,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.ENUMERATION)
+        self.assertEqual(result.type, TokenType.ENUMERATION)
 
     def test_reserved_private_word(self):
         # given
@@ -140,7 +140,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.PRIVATE)
+        self.assertEqual(result.type, TokenType.PRIVATE)
 
     def test_reserved_public_word(self):
         # given
@@ -154,7 +154,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.PUBLIC)
+        self.assertEqual(result.type, TokenType.PUBLIC)
 
     def test_reserved_constructor_word(self):
         # given
@@ -168,7 +168,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.CONSTRUCTOR)
+        self.assertEqual(result.type, TokenType.CONSTRUCTOR)
 
     def test_reserved_destructor_word(self):
         # given
@@ -182,7 +182,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.DESTRUCTOR)
+        self.assertEqual(result.type, TokenType.DESTRUCTOR)
 
     def test_reserved_if_word(self):
         # given
@@ -196,7 +196,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.IF)
+        self.assertEqual(result.type, TokenType.IF)
 
     def test_reserved_while_word(self):
         # given
@@ -210,7 +210,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.WHILE)
+        self.assertEqual(result.type, TokenType.WHILE)
 
     def test_reserved_new_word(self):
         # given
@@ -224,7 +224,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.NEW)
+        self.assertEqual(result.type, TokenType.NEW)
 
     def test_reserved_int_word(self):
         # given
@@ -238,7 +238,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.NUMBER_TYPE)
+        self.assertEqual(result.type, TokenType.NUMBER_TYPE)
 
     def test_reserved_integer_word(self):
         # given
@@ -252,7 +252,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.NUMBER_TYPE)
+        self.assertEqual(result.type, TokenType.NUMBER_TYPE)
 
     def test_reserved_decimal_word(self):
         # given
@@ -266,7 +266,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.FLOAT_TYPE)
+        self.assertEqual(result.type, TokenType.FLOAT_TYPE)
 
     def test_reserved_number_word(self):
         # given
@@ -280,7 +280,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.FLOAT_TYPE)
+        self.assertEqual(result.type, TokenType.FLOAT_TYPE)
 
     def test_reserved_string_word(self):
         # given
@@ -294,7 +294,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.STRING_TYPE)
+        self.assertEqual(result.type, TokenType.STRING_TYPE)
 
     def test_reserved_bool_word(self):
         # given
@@ -308,7 +308,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.BOOL_TYPE)
+        self.assertEqual(result.type, TokenType.BOOL_TYPE)
 
     def test_reserved_boolean_word(self):
         # given
@@ -322,7 +322,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.BOOL_TYPE)
+        self.assertEqual(result.type, TokenType.BOOL_TYPE)
 
     def test_reserved_true_word(self):
         # given
@@ -336,7 +336,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.TRUE)
+        self.assertEqual(result.type, TokenType.TRUE)
 
     def test_reserved_false_word(self):
         # given
@@ -350,7 +350,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.FALSE)
+        self.assertEqual(result.type, TokenType.FALSE)
 
     def test_reserved_null_word(self):
         # given
@@ -364,7 +364,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.NULL)
+        self.assertEqual(result.type, TokenType.NULL)
 
     def test_reserved_or_word(self):
         # given
@@ -378,7 +378,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.LOGICAL_OR)
+        self.assertEqual(result.type, TokenType.LOGICAL_OR)
 
     def test_reserved_and_word(self):
         # given
@@ -392,7 +392,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.LOGICAL_AND)
+        self.assertEqual(result.type, TokenType.LOGICAL_AND)
 
     def test_reserved_not_word(self):
         # given
@@ -406,7 +406,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.LOGICAL_NOT)
+        self.assertEqual(result.type, TokenType.LOGICAL_NOT)
 
     def test_reserved_equal_word(self):
         # given
@@ -420,7 +420,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.EQUALS)
+        self.assertEqual(result.type, TokenType.EQUALS)
 
     def test_reserved_greater_word(self):
         # given
@@ -434,7 +434,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.GREATER_THAN)
+        self.assertEqual(result.type, TokenType.GREATER_THAN)
 
     def test_reserved_less_word(self):
         # given
@@ -448,7 +448,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.LESS_THAN)
+        self.assertEqual(result.type, TokenType.LESS_THAN)
 
     def test_reserved_is_word(self):
         # given
@@ -462,7 +462,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.IS)
+        self.assertEqual(result.type, TokenType.IS)
 
     def test_reserved_in_word(self):
         # given
@@ -476,7 +476,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.IN)
+        self.assertEqual(result.type, TokenType.IN)
 
     def test_reserved_self_word(self):
         # given
@@ -490,7 +490,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.THIS)
+        self.assertEqual(result.type, TokenType.THIS)
 
     def test_reserved_this_word(self):
         # given
@@ -504,7 +504,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.THIS)
+        self.assertEqual(result.type, TokenType.THIS)
 
     def test_reserved_abstract_word(self):
         # given
@@ -518,7 +518,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.BLUEPRINT)
+        self.assertEqual(result.type, TokenType.BLUEPRINT)
 
     def test_reserved_concept_word(self):
         # given
@@ -532,7 +532,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.BLUEPRINT)
+        self.assertEqual(result.type, TokenType.BLUEPRINT)
 
     def test_reserved_conceptual_word(self):
         # given
@@ -546,7 +546,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.BLUEPRINT)
+        self.assertEqual(result.type, TokenType.BLUEPRINT)
 
     def test_reserved_theory_word(self):
         # given
@@ -560,7 +560,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.BLUEPRINT)
+        self.assertEqual(result.type, TokenType.BLUEPRINT)
 
     def test_reserved_theoretical_word(self):
         # given
@@ -574,7 +574,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.BLUEPRINT)
+        self.assertEqual(result.type, TokenType.BLUEPRINT)
 
     def test_reserved_protocol_word(self):
         # given
@@ -588,7 +588,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.BLUEPRINT)
+        self.assertEqual(result.type, TokenType.BLUEPRINT)
 
     def test_reserved_virtual_word(self):
         # given
@@ -602,7 +602,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.VIRTUAL)
+        self.assertEqual(result.type, TokenType.VIRTUAL)
 
     def test_reserved_import_word(self):
         # given
@@ -616,7 +616,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.IMPORT)
+        self.assertEqual(result.type, TokenType.IMPORT)
 
     def test_reserved_from_word(self):
         # given
@@ -630,7 +630,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.FROM)
+        self.assertEqual(result.type, TokenType.FROM)
 
     def test_reserved_require_word(self):
         # given
@@ -644,7 +644,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.REQUIRE)
+        self.assertEqual(result.type, TokenType.REQUIRE)
 
     def test_reserved_implements_word(self):
         # given
@@ -658,7 +658,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.FULFILLS)
+        self.assertEqual(result.type, TokenType.FULFILLS)
 
     def test_reserved_extends_word(self):
         # given
@@ -672,7 +672,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.BEHAVES_LIKE)
+        self.assertEqual(result.type, TokenType.BEHAVES_LIKE)
 
     def test_reserved_void_word(self):
         # given
@@ -686,7 +686,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.VOID)
+        self.assertEqual(result.type, TokenType.VOID)
 
     def test_constant_word(self):
         # given
@@ -700,7 +700,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.CONSTANT)
+        self.assertEqual(result.type, TokenType.CONSTANT)
 
     def test_identifier_word(self):
         # given
@@ -714,7 +714,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.IDENTIFIER)
+        self.assertEqual(result.type, TokenType.IDENTIFIER)
 
     def test_detect_word(self):
         # given
@@ -732,7 +732,7 @@ class TestWordMatcher(TestCase):
             ("r", True),
         ]
         state.peek_next_character.return_value = "a", False
-        expected_lexer_result = LexerResult(LexerType.IDENTIFIER, "identifier", state)
+        expected_lexer_result = LexerResult(TokenType.IDENTIFIER, "identifier", state)
         mocked_identifier_matcher = MagicMock()
         mocked_identifier_matcher.try_match.return_value = expected_lexer_result
         matchers = []
@@ -745,7 +745,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.IDENTIFIER)
+        self.assertEqual(result.type, TokenType.IDENTIFIER)
         self.assertEqual(result.value, "identifier")
         state.next_character.assert_called()
 
@@ -774,7 +774,7 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.UNKNOWN)
+        self.assertEqual(result.type, TokenType.UNKNOWN)
         self.assertEqual(result.value, "identifier")
         state.next_character.assert_called()
 
@@ -801,6 +801,6 @@ class TestWordMatcher(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.IDENTIFIER)
+        self.assertEqual(result.type, TokenType.IDENTIFIER)
         self.assertEqual(result.value, "Abc123")
         state.next_character.assert_called()

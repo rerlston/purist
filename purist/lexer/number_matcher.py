@@ -1,5 +1,5 @@
 from purist.lexer.base_matcher import BaseMatcher
-from purist.models.lexer_models import LexerResult, LexerState, LexerType
+from purist.models.lexer_models import LexerResult, LexerState, TokenType
 from purist.utils.logger import Logger
 
 
@@ -28,8 +28,8 @@ class NumberMatcher(BaseMatcher):
                 float(string)
                 Logger.trace(f"found: {string}")
                 if "." in string:
-                    return LexerResult(LexerType.FLOAT_LITERAL, string, state)
-                return LexerResult(LexerType.NUMBER_LITERAL, string, state)
+                    return LexerResult(TokenType.FLOAT_LITERAL, string, state)
+                return LexerResult(TokenType.NUMBER_LITERAL, string, state)
             except ValueError:
                 pass
 

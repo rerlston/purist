@@ -2,7 +2,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock
 
 from purist.lexer.tokenizer import Tokenizer
-from purist.models.lexer_models import LexerResult, LexerType, LexerState
+from purist.models.lexer_models import LexerResult, TokenType, LexerState
 from purist.utils.errors import InvalidSyntaxError
 from purist.utils.logger import Logger, LogLevel
 
@@ -25,7 +25,7 @@ class TestTokenizer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.EOF)
+        self.assertEqual(result.type, TokenType.EOF)
 
     def test_second_eof(self):
         # given
@@ -39,7 +39,7 @@ class TestTokenizer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.EOF)
+        self.assertEqual(result.type, TokenType.EOF)
 
     def test_find_largest_matcher(self):
         # given
@@ -47,7 +47,7 @@ class TestTokenizer(TestCase):
         matchers = []
         mocked_matcher = MagicMock()
         mocked_matcher.try_match.return_value = LexerResult(
-            LexerType.ADDITION, "+", self._mocked_state
+            TokenType.ADDITION, "+", self._mocked_state
         )
         matchers.append(mocked_matcher)
         service = Tokenizer(matchers, self._mocked_state)
@@ -58,7 +58,7 @@ class TestTokenizer(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.ADDITION)
+        self.assertEqual(result.type, TokenType.ADDITION)
 
     def test_find_largest_matcher_fails_with_syntax_error(self):
         # given
@@ -104,67 +104,67 @@ class TestTokenizer(TestCase):
         # then
         # service
         self.assertIsInstance(service_token, LexerResult)
-        self.assertEqual(service_token.type, LexerType.SERVICE)
+        self.assertEqual(service_token.type, TokenType.SERVICE)
 
         # Abc123
         self.assertIsInstance(identifier_token_1, LexerResult)
-        self.assertEqual(identifier_token_1.type, LexerType.IDENTIFIER)
+        self.assertEqual(identifier_token_1.type, TokenType.IDENTIFIER)
 
         # { 1
         self.assertIsInstance(left_curly_token_1, LexerResult)
-        self.assertEqual(left_curly_token_1.type, LexerType.L_CURLY)
+        self.assertEqual(left_curly_token_1.type, TokenType.L_CURLY)
 
         # constructor
         self.assertIsInstance(constructor_token, LexerResult)
-        self.assertEqual(constructor_token.type, LexerType.CONSTRUCTOR)
+        self.assertEqual(constructor_token.type, TokenType.CONSTRUCTOR)
 
         # ( 1
         self.assertIsInstance(left_round_token_1, LexerResult)
-        self.assertEqual(left_round_token_1.type, LexerType.L_ROUND)
+        self.assertEqual(left_round_token_1.type, TokenType.L_ROUND)
 
         # ) 1
         self.assertIsInstance(right_round_token_1, LexerResult)
-        self.assertEqual(right_round_token_1.type, LexerType.R_ROUND)
+        self.assertEqual(right_round_token_1.type, TokenType.R_ROUND)
 
         # { 2
         self.assertIsInstance(left_curly_token_2, LexerResult)
-        self.assertEqual(left_curly_token_2.type, LexerType.L_CURLY)
+        self.assertEqual(left_curly_token_2.type, TokenType.L_CURLY)
 
         # } 2
         self.assertIsInstance(right_curly_token_1, LexerResult)
-        self.assertEqual(right_curly_token_1.type, LexerType.R_CURLY)
+        self.assertEqual(right_curly_token_1.type, TokenType.R_CURLY)
 
         # public
         self.assertIsInstance(public_token, LexerResult)
-        self.assertEqual(public_token.type, LexerType.PUBLIC)
+        self.assertEqual(public_token.type, TokenType.PUBLIC)
 
         # void
         self.assertIsInstance(void_token, LexerResult)
-        self.assertEqual(void_token.type, LexerType.VOID)
+        self.assertEqual(void_token.type, TokenType.VOID)
 
         # method
         self.assertIsInstance(identifier_token_2, LexerResult)
-        self.assertEqual(identifier_token_2.type, LexerType.IDENTIFIER)
+        self.assertEqual(identifier_token_2.type, TokenType.IDENTIFIER)
 
         # ( 2
         self.assertIsInstance(left_round_token_2, LexerResult)
-        self.assertEqual(left_round_token_2.type, LexerType.L_ROUND)
+        self.assertEqual(left_round_token_2.type, TokenType.L_ROUND)
 
         # ) 2
         self.assertIsInstance(right_round_token_2, LexerResult)
-        self.assertEqual(right_round_token_2.type, LexerType.R_ROUND)
+        self.assertEqual(right_round_token_2.type, TokenType.R_ROUND)
 
         # { 3
         self.assertIsInstance(left_curly_token_3, LexerResult)
-        self.assertEqual(left_curly_token_3.type, LexerType.L_CURLY)
+        self.assertEqual(left_curly_token_3.type, TokenType.L_CURLY)
 
         # } 2
         self.assertIsInstance(right_curly_token_2, LexerResult)
-        self.assertEqual(right_curly_token_2.type, LexerType.R_CURLY)
+        self.assertEqual(right_curly_token_2.type, TokenType.R_CURLY)
 
         # } 3
         self.assertIsInstance(right_curly_token_3, LexerResult)
-        self.assertEqual(right_curly_token_3.type, LexerType.R_CURLY)
+        self.assertEqual(right_curly_token_3.type, TokenType.R_CURLY)
 
         service.next()
 
@@ -190,4 +190,4 @@ class SimpleClass extends AnotherClass {
 
         # then
         self.assertIsInstance(class_token, LexerResult)
-        self.assertEqual(class_token.type, LexerType.SERVICE)
+        self.assertEqual(class_token.type, TokenType.SERVICE)

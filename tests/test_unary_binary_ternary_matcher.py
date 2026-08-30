@@ -17,7 +17,7 @@ from purist.lexer.operation_unary_binary_ternary_matcher import (
     OperationUnaryNegationOperatorMatcher,
     OperationUnaryNotOperatorMatcher,
 )
-from purist.models.lexer_models import LexerResult, LexerType
+from purist.models.lexer_models import LexerResult, TokenType
 from purist.utils.logger import Logger, LogLevel
 
 
@@ -33,7 +33,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given
         text = "!"
         self._mocked_state.next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.ASSIGN)
+        mocked_property = PropertyMock(return_value=TokenType.ASSIGN)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationUnaryNotOperatorMatcher()
 
@@ -43,7 +43,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.LOGICAL_NOT)
+        self.assertEqual(result.type, TokenType.LOGICAL_NOT)
         self.assertEqual(result.value, "!")
         self._mocked_state.next_character.assert_called_once()
         mocked_property.assert_called_once()
@@ -52,7 +52,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given
         text = "!"
         self._mocked_state.next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationUnaryNotOperatorMatcher()
 
@@ -81,7 +81,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "+"
         self._mocked_state.next_character.side_effect = [(text, False), (text, False)]
         self._mocked_state.peek_next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationUnaryIncrementOperatorMatcher()
 
@@ -91,7 +91,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.INCREMENT)
+        self.assertEqual(result.type, TokenType.INCREMENT)
         self.assertEqual(result.value, "++")
         self.assertEqual(self._mocked_state.next_character.call_count, 2)
         self._mocked_state.peek_next_character.assert_called_once()
@@ -101,7 +101,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "+"
         self._mocked_state.next_character.side_effect = [(text, False), (text, False)]
         self._mocked_state.peek_next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationUnaryIncrementOperatorMatcher()
 
@@ -130,7 +130,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "-"
         self._mocked_state.next_character.side_effect = [(text, False), (text, False)]
         self._mocked_state.peek_next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationUnaryDecrementOperatorMatcher()
 
@@ -140,7 +140,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.DECREMENT)
+        self.assertEqual(result.type, TokenType.DECREMENT)
         self.assertEqual(result.value, "--")
         self.assertEqual(self._mocked_state.next_character.call_count, 2)
         self._mocked_state.peek_next_character.assert_called_once()
@@ -150,7 +150,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "-"
         self._mocked_state.next_character.side_effect = [(text, False), (text, False)]
         self._mocked_state.peek_next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationUnaryDecrementOperatorMatcher()
 
@@ -178,7 +178,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given
         text = "-"
         self._mocked_state.next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.ASSIGN)
+        mocked_property = PropertyMock(return_value=TokenType.ASSIGN)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationUnaryNegationOperatorMatcher()
 
@@ -188,7 +188,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.NEGATION)
+        self.assertEqual(result.type, TokenType.NEGATION)
         self.assertEqual(result.value, "-")
         self._mocked_state.next_character.assert_called_once()
 
@@ -197,7 +197,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "-"
         self._mocked_state.next_character.return_value = text, False
         self._mocked_state.peek_next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.L_ROUND)
+        mocked_property = PropertyMock(return_value=TokenType.L_ROUND)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationUnaryNegationOperatorMatcher()
 
@@ -207,7 +207,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.NEGATION)
+        self.assertEqual(result.type, TokenType.NEGATION)
         self.assertEqual(result.value, "-")
         self._mocked_state.next_character.assert_called_once()
 
@@ -216,7 +216,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "-"
         self._mocked_state.next_character.return_value = text, False
         self._mocked_state.peek_next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationUnaryNegationOperatorMatcher()
 
@@ -242,7 +242,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "+"
         self._mocked_state.next_character.return_value = text, False
         self._mocked_state.peek_next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryMathsOperatorMatcher()
 
@@ -252,7 +252,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.ADDITION)
+        self.assertEqual(result.type, TokenType.ADDITION)
         self.assertEqual(result.value, "+")
         self._mocked_state.next_character.assert_called_once()
 
@@ -261,7 +261,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "+"
         self._mocked_state.next_character.return_value = text, False
         self._mocked_state.peek_next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryMathsOperatorMatcher()
 
@@ -271,7 +271,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.ADDITION)
+        self.assertEqual(result.type, TokenType.ADDITION)
         self.assertEqual(result.value, "+")
 
         self._mocked_state.next_character.assert_called_once()
@@ -281,7 +281,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "-"
         self._mocked_state.next_character.return_value = text, False
         self._mocked_state.peek_next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryMathsOperatorMatcher()
 
@@ -291,7 +291,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.SUBTRACTION)
+        self.assertEqual(result.type, TokenType.SUBTRACTION)
         self.assertEqual(result.value, "-")
 
         self._mocked_state.next_character.assert_called_once()
@@ -301,7 +301,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "-"
         self._mocked_state.next_character.return_value = text, False
         self._mocked_state.peek_next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryMathsOperatorMatcher()
 
@@ -311,7 +311,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.SUBTRACTION)
+        self.assertEqual(result.type, TokenType.SUBTRACTION)
         self.assertEqual(result.value, "-")
 
         self._mocked_state.next_character.assert_called_once()
@@ -321,7 +321,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "%"
         self._mocked_state.next_character.return_value = text, False
         self._mocked_state.peek_next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryMathsOperatorMatcher()
 
@@ -331,7 +331,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.MOD)
+        self.assertEqual(result.type, TokenType.MOD)
         self.assertEqual(result.value, "%")
 
         self._mocked_state.next_character.assert_called_once()
@@ -341,7 +341,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "%"
         self._mocked_state.next_character.return_value = text, False
         self._mocked_state.peek_next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryMathsOperatorMatcher()
 
@@ -351,7 +351,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.MOD)
+        self.assertEqual(result.type, TokenType.MOD)
         self.assertEqual(result.value, "%")
 
         self._mocked_state.next_character.assert_called_once()
@@ -361,7 +361,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "^"
         self._mocked_state.next_character.return_value = text, False
         self._mocked_state.peek_next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryMathsOperatorMatcher()
 
@@ -371,7 +371,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.XOR)
+        self.assertEqual(result.type, TokenType.XOR)
         self.assertEqual(result.value, "^")
 
         self._mocked_state.next_character.assert_called_once()
@@ -381,7 +381,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "^"
         self._mocked_state.next_character.return_value = text, False
         self._mocked_state.peek_next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryMathsOperatorMatcher()
 
@@ -391,7 +391,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.XOR)
+        self.assertEqual(result.type, TokenType.XOR)
         self.assertEqual(result.value, "^")
 
         self._mocked_state.next_character.assert_called_once()
@@ -401,7 +401,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "/"
         self._mocked_state.next_character.return_value = text, False
         self._mocked_state.peek_next_character.return_value = " ", False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryMathsOperatorMatcher()
 
@@ -411,7 +411,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.DIVIDE)
+        self.assertEqual(result.type, TokenType.DIVIDE)
         self.assertEqual(result.value, "/")
 
         self._mocked_state.next_character.assert_called_once()
@@ -421,7 +421,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "/"
         self._mocked_state.next_character.return_value = text, False
         self._mocked_state.peek_next_character.return_value = " ", False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryMathsOperatorMatcher()
 
@@ -431,7 +431,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.DIVIDE)
+        self.assertEqual(result.type, TokenType.DIVIDE)
         self.assertEqual(result.value, "/")
 
         self._mocked_state.next_character.assert_called_once()
@@ -441,7 +441,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "*"
         self._mocked_state.next_character.return_value = text, False
         self._mocked_state.peek_next_character.return_value = "3", False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryMathsOperatorMatcher()
 
@@ -451,7 +451,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.MULTIPLY)
+        self.assertEqual(result.type, TokenType.MULTIPLY)
         self.assertEqual(result.value, "*")
 
         self._mocked_state.next_character.assert_called_once()
@@ -461,7 +461,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "*"
         self._mocked_state.next_character.return_value = text, False
         self._mocked_state.peek_next_character.return_value = "b", False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryMathsOperatorMatcher()
 
@@ -471,7 +471,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.MULTIPLY)
+        self.assertEqual(result.type, TokenType.MULTIPLY)
         self.assertEqual(result.value, "*")
 
         self._mocked_state.next_character.assert_called_once()
@@ -481,7 +481,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "*"
         self._mocked_state.next_character.side_effect = [(text, False), (text, False)]
         self._mocked_state.peek_next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryMathsOperatorMatcher()
 
@@ -491,7 +491,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.POWER)
+        self.assertEqual(result.type, TokenType.POWER)
         self.assertEqual(result.value, "**")
 
         self.assertEqual(self._mocked_state.next_character.call_count, 2)
@@ -501,7 +501,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "*"
         self._mocked_state.next_character.side_effect = [(text, False), (text, False)]
         self._mocked_state.peek_next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryMathsOperatorMatcher()
 
@@ -511,7 +511,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.POWER)
+        self.assertEqual(result.type, TokenType.POWER)
         self.assertEqual(result.value, "**")
 
         self.assertEqual(self._mocked_state.next_character.call_count, 2)
@@ -536,7 +536,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "+"
         self._mocked_state.next_character.side_effect = [(text, False), (text, False)]
         self._mocked_state.peek_next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.PRIVATE)
+        mocked_property = PropertyMock(return_value=TokenType.PRIVATE)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryMathsOperatorMatcher()
 
@@ -553,7 +553,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "="
         self._mocked_state.next_character.return_value = text, False
         self._mocked_state.peek_next_character.return_value = "b", False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryAssignmentMatcher()
 
@@ -563,7 +563,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.ASSIGN)
+        self.assertEqual(result.type, TokenType.ASSIGN)
         self.assertEqual(result.value, "=")
 
         self._mocked_state.next_character.assert_called_once()
@@ -573,7 +573,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = "="
         self._mocked_state.next_character.return_value = text, False
         self._mocked_state.peek_next_character.return_value = text, False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryMathsOperatorMatcher()
 
@@ -588,7 +588,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given a != b
         self._mocked_state.next_character.side_effect = [("!", False), ("=", False)]
         self._mocked_state.peek_next_character.return_value = "=", False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryNegativeComparisonMatcher()
 
@@ -598,7 +598,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.NOT_EQUALS)
+        self.assertEqual(result.type, TokenType.NOT_EQUALS)
         self.assertEqual(result.value, "!=")
 
         self.assertEqual(self._mocked_state.next_character.call_count, 2)
@@ -607,7 +607,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given 1 != b
         self._mocked_state.next_character.side_effect = [("!", False), ("=", False)]
         self._mocked_state.peek_next_character.return_value = "=", False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryNegativeComparisonMatcher()
 
@@ -617,7 +617,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.NOT_EQUALS)
+        self.assertEqual(result.type, TokenType.NOT_EQUALS)
         self.assertEqual(result.value, "!=")
 
         self.assertEqual(self._mocked_state.next_character.call_count, 2)
@@ -638,7 +638,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given a > b
         self._mocked_state.next_character.return_value = ">", False
         self._mocked_state.peek_next_character.return_value = "b", False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryGreaterComparisonMatcher()
 
@@ -648,7 +648,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.GREATER_THAN)
+        self.assertEqual(result.type, TokenType.GREATER_THAN)
         self.assertEqual(result.value, ">")
 
         self._mocked_state.next_character.assert_called_once()
@@ -658,7 +658,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         text = ">"
         self._mocked_state.next_character.return_value = ">", False
         self._mocked_state.peek_next_character.return_value = "b", False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryGreaterComparisonMatcher()
 
@@ -668,7 +668,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.GREATER_THAN)
+        self.assertEqual(result.type, TokenType.GREATER_THAN)
         self.assertEqual(result.value, ">")
 
         self._mocked_state.next_character.assert_called_once()
@@ -677,7 +677,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given a >= b
         self._mocked_state.next_character.side_effect = [(">", False), ("=", False)]
         self._mocked_state.peek_next_character.return_value = "=", False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryGreaterComparisonMatcher()
 
@@ -687,7 +687,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.GREATER_OR_EQUAL)
+        self.assertEqual(result.type, TokenType.GREATER_OR_EQUAL)
         self.assertEqual(result.value, ">=")
 
         self.assertEqual(self._mocked_state.next_character.call_count, 2)
@@ -696,7 +696,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given 1 >= b
         self._mocked_state.next_character.side_effect = [(">", False), ("=", False)]
         self._mocked_state.peek_next_character.return_value = "=", False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryGreaterComparisonMatcher()
 
@@ -706,7 +706,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.GREATER_OR_EQUAL)
+        self.assertEqual(result.type, TokenType.GREATER_OR_EQUAL)
         self.assertEqual(result.value, ">=")
 
         self.assertEqual(self._mocked_state.next_character.call_count, 2)
@@ -727,7 +727,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given a < b
         self._mocked_state.next_character.return_value = "<", False
         self._mocked_state.peek_next_character.return_value = "b", False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryLessorComparisonMatcher()
 
@@ -737,7 +737,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.LESS_THAN)
+        self.assertEqual(result.type, TokenType.LESS_THAN)
         self.assertEqual(result.value, "<")
 
         self.assertEqual(self._mocked_state.next_character.call_count, 1)
@@ -746,7 +746,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given 1 < b
         self._mocked_state.next_character.return_value = "<", False
         self._mocked_state.peek_next_character.return_value = "b", False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryLessorComparisonMatcher()
 
@@ -756,7 +756,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.LESS_THAN)
+        self.assertEqual(result.type, TokenType.LESS_THAN)
         self.assertEqual(result.value, "<")
 
         self.assertEqual(self._mocked_state.next_character.call_count, 1)
@@ -765,7 +765,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given a <= b
         self._mocked_state.next_character.side_effect = [("<", False), ("=", False)]
         self._mocked_state.peek_next_character.return_value = "=", False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryLessorComparisonMatcher()
 
@@ -775,7 +775,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.LESS_OR_EQUAL)
+        self.assertEqual(result.type, TokenType.LESS_OR_EQUAL)
         self.assertEqual(result.value, "<=")
 
         self.assertEqual(self._mocked_state.next_character.call_count, 2)
@@ -784,7 +784,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given 1 <= b
         self._mocked_state.next_character.side_effect = [("<", False), ("=", False)]
         self._mocked_state.peek_next_character.return_value = "=", False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryLessorComparisonMatcher()
 
@@ -794,7 +794,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.LESS_OR_EQUAL)
+        self.assertEqual(result.type, TokenType.LESS_OR_EQUAL)
         self.assertEqual(result.value, "<=")
 
         self.assertEqual(self._mocked_state.next_character.call_count, 2)
@@ -803,7 +803,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given < b
         self._mocked_state.next_character.return_value = "<", False
         self._mocked_state.peek_next_character.return_value = "b", False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryLessorComparisonMatcher()
 
@@ -817,7 +817,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given a | b
         self._mocked_state.next_character.return_value = "|", False
         self._mocked_state.peek_next_character.return_value = "b", False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryOrMatcher()
 
@@ -827,7 +827,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.MATH_OR)
+        self.assertEqual(result.type, TokenType.MATH_OR)
         self.assertEqual(result.value, "|")
 
         self._mocked_state.next_character.assert_called_once()
@@ -836,7 +836,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given 1 | b
         self._mocked_state.next_character.return_value = "|", False
         self._mocked_state.peek_next_character.return_value = "b", False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryOrMatcher()
 
@@ -846,7 +846,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.MATH_OR)
+        self.assertEqual(result.type, TokenType.MATH_OR)
         self.assertEqual(result.value, "|")
 
         self._mocked_state.next_character.assert_called_once()
@@ -855,7 +855,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given a || b
         self._mocked_state.next_character.side_effect = [("|", False), ("|", False)]
         self._mocked_state.peek_next_character.return_value = "|", False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryOrMatcher()
 
@@ -865,7 +865,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.LOGICAL_OR)
+        self.assertEqual(result.type, TokenType.LOGICAL_OR)
         self.assertEqual(result.value, "||")
 
         self.assertEqual(self._mocked_state.next_character.call_count, 2)
@@ -874,7 +874,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given 1 || b
         self._mocked_state.next_character.side_effect = [("|", False), ("|", False)]
         self._mocked_state.peek_next_character.return_value = "|", False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryOrMatcher()
 
@@ -884,7 +884,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.LOGICAL_OR)
+        self.assertEqual(result.type, TokenType.LOGICAL_OR)
         self.assertEqual(result.value, "||")
 
         self.assertEqual(self._mocked_state.next_character.call_count, 2)
@@ -920,7 +920,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given a & b
         self._mocked_state.next_character.return_value = "&", False
         self._mocked_state.peek_next_character.return_value = "b", False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryAndMatcher()
 
@@ -930,7 +930,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.MATH_AND)
+        self.assertEqual(result.type, TokenType.MATH_AND)
         self.assertEqual(result.value, "&")
 
         self._mocked_state.next_character.assert_called_once()
@@ -939,7 +939,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given 1 & b
         self._mocked_state.next_character.return_value = "&", False
         self._mocked_state.peek_next_character.return_value = "b", False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryAndMatcher()
 
@@ -949,7 +949,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.MATH_AND)
+        self.assertEqual(result.type, TokenType.MATH_AND)
         self.assertEqual(result.value, "&")
 
         self._mocked_state.next_character.assert_called_once()
@@ -958,7 +958,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given a && b
         self._mocked_state.next_character.side_effect = [("&", False), ("&", False)]
         self._mocked_state.peek_next_character.return_value = "&", False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryAndMatcher()
 
@@ -968,7 +968,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.LOGICAL_AND)
+        self.assertEqual(result.type, TokenType.LOGICAL_AND)
         self.assertEqual(result.value, "&&")
 
         self.assertEqual(self._mocked_state.next_character.call_count, 2)
@@ -977,7 +977,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given 1 && b
         self._mocked_state.next_character.side_effect = [("&", False), ("&", False)]
         self._mocked_state.peek_next_character.return_value = "&", False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryAndMatcher()
 
@@ -987,7 +987,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.LOGICAL_AND)
+        self.assertEqual(result.type, TokenType.LOGICAL_AND)
         self.assertEqual(result.value, "&&")
 
         self.assertEqual(self._mocked_state.next_character.call_count, 2)
@@ -1024,7 +1024,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given "string" + b
         self._mocked_state.next_character.return_value = "+", False
         self._mocked_state.peek_next_character.return_value = "b", False
-        mocked_property = PropertyMock(return_value=LexerType.STRING_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.STRING_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryStringConcatenationMatcher()
 
@@ -1034,7 +1034,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.STRING_CONCATENATION)
+        self.assertEqual(result.type, TokenType.STRING_CONCATENATION)
         self.assertEqual(result.value, "+")
 
         self._mocked_state.next_character.assert_called_once()
@@ -1043,7 +1043,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given "1 + string"
         self._mocked_state.next_character.return_value = "+", False
         self._mocked_state.peek_next_character.return_value = "s", False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationBinaryStringConcatenationMatcher()
 
@@ -1071,7 +1071,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # given a = 1==1 ? c : d
         self._mocked_state.next_character.return_value = "?", False
         self._mocked_state.peek_next_character.return_value = "c", False
-        mocked_property = PropertyMock(return_value=LexerType.NUMBER_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.NUMBER_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationTernaryMatcher()
 
@@ -1081,14 +1081,14 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.QUESTION)
+        self.assertEqual(result.type, TokenType.QUESTION)
         self.assertEqual(result.value, "?")
 
     def test_ternary_first_part_concatenation_operator_after_string_match(self):
         # given a = b=="" ? c : d
         self._mocked_state.next_character.return_value = "?", False
         self._mocked_state.peek_next_character.return_value = "c", False
-        mocked_property = PropertyMock(return_value=LexerType.STRING_LITERAL)
+        mocked_property = PropertyMock(return_value=TokenType.STRING_LITERAL)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationTernaryMatcher()
 
@@ -1098,14 +1098,14 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.QUESTION)
+        self.assertEqual(result.type, TokenType.QUESTION)
         self.assertEqual(result.value, "?")
 
     def test_ternary_first_part_concatenation_operator_after_identifier_match(self):
         # given a = 1==b ? c : d
         self._mocked_state.next_character.return_value = "?", False
         self._mocked_state.peek_next_character.return_value = "c", False
-        mocked_property = PropertyMock(return_value=LexerType.IDENTIFIER)
+        mocked_property = PropertyMock(return_value=TokenType.IDENTIFIER)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationTernaryMatcher()
 
@@ -1115,14 +1115,14 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.QUESTION)
+        self.assertEqual(result.type, TokenType.QUESTION)
         self.assertEqual(result.value, "?")
 
     def test_ternary_first_part_concatenation_operator_after_boolean_match(self):
         # given a = b == true ? c : d
         self._mocked_state.next_character.return_value = "?", False
         self._mocked_state.peek_next_character.return_value = "c", False
-        mocked_property = PropertyMock(return_value=LexerType.TRUE)
+        mocked_property = PropertyMock(return_value=TokenType.TRUE)
         type(self._mocked_previous_result).type = mocked_property
         service = OperationTernaryMatcher()
 
@@ -1132,7 +1132,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, LexerResult)
-        self.assertEqual(result.type, LexerType.QUESTION)
+        self.assertEqual(result.type, TokenType.QUESTION)
         self.assertEqual(result.value, "?")
 
     def test_operation_calculation_matcher_list_of_matchers(self):
@@ -1140,7 +1140,7 @@ class TestUnaryBinaryTernaryMatchers(TestCase):
         operator_matchers = []
         mocked_base_operator = MagicMock()
         mocked_base_operator.try_match.return_value = LexerResult(
-            LexerType.ADDITION, "+", self._mocked_state
+            TokenType.ADDITION, "+", self._mocked_state
         )
         operator_matchers.append(mocked_base_operator)
         service = OperationCalculationMatcher(operator_matchers)

@@ -1,5 +1,5 @@
 from purist.lexer.base_matcher import BaseMatcher
-from purist.models.lexer_models import LexerResult, LexerState, LexerType
+from purist.models.lexer_models import LexerResult, LexerState, TokenType
 from purist.utils.logger import Logger
 
 
@@ -49,4 +49,4 @@ class StringMatcher(BaseMatcher):
             Logger.trace("not found")
             return None
         Logger.trace(f"found: {string}")
-        return LexerResult(LexerType.STRING_LITERAL, string, state)
+        return LexerResult(TokenType.STRING_LITERAL, string, state)
