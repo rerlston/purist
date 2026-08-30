@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 from purist.models.token import Token, TokenType
 from purist.models.node import Node
-from utils.errors import UnexpectedKeyword
+from purist.utils.errors import UnexpectedKeyword
 
 class TypeParser(ABC):
     @abstractmethod

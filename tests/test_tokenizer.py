@@ -1,13 +1,13 @@
 from unittest import TestCase
 from unittest.mock import MagicMock
 
-from purist.lexer.lexer import Lexer
+from purist.lexer.tokenizer import Tokenizer
 from purist.models.lexer_models import LexerResult, LexerType, LexerState
-from purist.utils.errors import Error, InvalidSyntaxError
+from purist.utils.errors import InvalidSyntaxError
 from purist.utils.logger import Logger, LogLevel
 
 
-class TestLexer(TestCase):
+class TestTokenizer(TestCase):
 
     def setUp(self):
         Logger.configure(log_level=LogLevel.INFO)
@@ -17,7 +17,7 @@ class TestLexer(TestCase):
         # given
         self._mocked_state.return_value.is_eof.return_value = True
         matchers = []
-        service = Lexer(matchers, self._mocked_state)
+        service = Tokenizer(matchers, self._mocked_state)
 
         # when
         result = service.next()
@@ -31,7 +31,7 @@ class TestLexer(TestCase):
         # given
         self._mocked_state.is_eof.side_effect = [False, True]
         matchers = []
-        service = Lexer(matchers, self._mocked_state)
+        service = Tokenizer(matchers, self._mocked_state)
 
         # when
         result = service.next()
@@ -50,7 +50,7 @@ class TestLexer(TestCase):
             LexerType.ADDITION, "+", self._mocked_state
         )
         matchers.append(mocked_matcher)
-        service = Lexer(matchers, self._mocked_state)
+        service = Tokenizer(matchers, self._mocked_state)
 
         # when
         result = service.next()
@@ -64,7 +64,7 @@ class TestLexer(TestCase):
         # given
         self._mocked_state.is_eof.return_value = False
         matchers = []
-        service = Lexer(matchers, self._mocked_state)
+        service = Tokenizer(matchers, self._mocked_state)
 
         # when
         result = service.next()
@@ -81,7 +81,7 @@ class TestLexer(TestCase):
             public void method(){}
         }"""
         state = LexerState("test", text)
-        service = Lexer(Lexer.setup(), state)
+        service = Tokenizer(Tokenizer.setup(), state)
 
         # when
         service_token = service.next()
@@ -181,12 +181,12 @@ class SimpleClass extends AnotherClass {
 }
         """
         state = LexerState("test", text)
-        service = Lexer(Lexer.setup(), state)
+        service = Tokenizer(Tokenizer.setup(), state)
 
         # when
         service.next()
         class_token = service.next()
-        Logger.info(class_token)
+        Logger.trace(class_token)
 
         # then
         self.assertIsInstance(class_token, LexerResult)

@@ -32,7 +32,7 @@ class LexerState:
             if self._current_line >= len(self._lines):
                 self._reached_eof = True
         else:
-            Logger.debug(
+            Logger.trace(
                 f"{self._current_line}/{len(self._lines)}:{self._current_column}/{len(self._lines[self._current_line])}"
             )
         return is_new_line
